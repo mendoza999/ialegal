@@ -79,7 +79,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
         
         {/* Headline */}
         <div className="text-center space-y-1.5">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#D4AF37] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#BF092F] tracking-tight">
             Buscador Especializado de Doctrina & Libros Tributarios
           </h1>
           <p className="text-[#888] text-xs sm:text-sm max-w-2xl mx-auto">
@@ -97,7 +97,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por concepto dogmático (ej: causalidad, devengado, Norma XVI, prescripción, crédito fiscal)..."
-            className="w-full pl-11 pr-12 py-3.5 bg-[#16161A] text-[#FFF] placeholder-[#555] border border-[#222226] focus:border-[#D4AF37] rounded-xl text-sm sm:text-base focus:outline-none transition-all shadow-lg font-sans"
+            className="w-full pl-11 pr-12 py-3.5 bg-[#16161A] text-[#FFF] placeholder-[#555] border border-[#222226] focus:border-[#BF092F] rounded-xl text-sm sm:text-base focus:outline-none transition-all shadow-lg font-sans"
           />
           {searchQuery && (
             <button
@@ -115,13 +115,13 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
           {/* Category Selector */}
           <div className="relative">
             <label className="block text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center space-x-1">
-              <Layers className="w-3 h-3 text-[#D4AF37]" />
+              <Layers className="w-3 h-3 text-[#BF092F]" />
               <span>Rama / Categoría:</span>
             </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value as any)}
-              className="w-full bg-[#16161A] text-[#CCC] text-xs border border-[#222226] rounded-lg px-3 py-2 focus:border-[#D4AF37] focus:outline-none cursor-pointer"
+              className="w-full bg-[#16161A] text-[#CCC] text-xs border border-[#222226] rounded-lg px-3 py-2 focus:border-[#BF092F] focus:outline-none cursor-pointer"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -134,7 +134,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
           {/* Source Selector (All, Drive, Doctrina) */}
           <div>
             <label className="block text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center space-x-1">
-              <BookOpen className="w-3 h-3 text-[#D4AF37]" />
+              <BookOpen className="w-3 h-3 text-[#BF092F]" />
               <span>Origen de Datos:</span>
             </label>
             <div className="grid grid-cols-3 gap-1 bg-[#16161A] p-1 rounded-lg border border-[#222226]">
@@ -143,7 +143,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
                 onClick={() => setSelectedSource('all')}
                 className={`text-xs py-1 px-2 rounded font-medium transition-colors ${
                   selectedSource === 'all'
-                    ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold'
+                    ? 'bg-[#BF092F] text-[#0A0A0C] font-bold'
                     : 'text-[#888] hover:text-[#CCC]'
                 }`}
               >
@@ -154,7 +154,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
                 onClick={() => setSelectedSource('drive')}
                 className={`text-xs py-1 px-2 rounded font-medium transition-colors flex items-center justify-center space-x-1 ${
                   selectedSource === 'drive'
-                    ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold'
+                    ? 'bg-[#BF092F] text-[#0A0A0C] font-bold'
                     : 'text-[#888] hover:text-[#CCC]'
                 }`}
               >
@@ -166,7 +166,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
                 onClick={() => setSelectedSource('doctrina')}
                 className={`text-xs py-1 px-2 rounded font-medium transition-colors ${
                   selectedSource === 'doctrina'
-                    ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold'
+                    ? 'bg-[#BF092F] text-[#0A0A0C] font-bold'
                     : 'text-[#888] hover:text-[#CCC]'
                 }`}
               >
@@ -178,13 +178,13 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
           {/* Author Selector */}
           <div>
             <label className="block text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1 flex items-center space-x-1">
-              <Filter className="w-3 h-3 text-[#D4AF37]" />
+              <Filter className="w-3 h-3 text-[#BF092F]" />
               <span>Autor / Tratadista:</span>
             </label>
             <select
               value={selectedAuthor}
               onChange={(e) => setSelectedAuthor(e.target.value)}
-              className="w-full bg-[#16161A] text-[#CCC] text-xs border border-[#222226] rounded-lg px-3 py-2 focus:border-[#D4AF37] focus:outline-none cursor-pointer"
+              className="w-full bg-[#16161A] text-[#CCC] text-xs border border-[#222226] rounded-lg px-3 py-2 focus:border-[#BF092F] focus:outline-none cursor-pointer"
             >
               <option value="">Todos los autores ({availableAuthors.length})</option>
               {availableAuthors.map((author) => (
@@ -200,7 +200,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
         {/* Quick Article Filters & Suggestions */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
           <span className="text-[#888] font-medium mr-1 flex items-center text-[11px]">
-            <Tag className="w-3 h-3 mr-1 text-[#D4AF37]" /> Artículos frecuentes:
+            <Tag className="w-3 h-3 mr-1 text-[#BF092F]" /> Artículos frecuentes:
           </span>
           {POPULAR_ARTICLES.map((art) => (
             <button
@@ -208,8 +208,8 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
               onClick={() => setSelectedArticle(selectedArticle === art ? '' : art)}
               className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors border ${
                 selectedArticle === art
-                  ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold border-[#D4AF37]'
-                  : 'bg-[#16161A] text-[#888] border-[#222226] hover:border-[#D4AF37]/50 hover:text-white'
+                  ? 'bg-[#BF092F] text-[#0A0A0C] font-bold border-[#BF092F]'
+                  : 'bg-[#16161A] text-[#888] border-[#222226] hover:border-[#BF092F]/50 hover:text-white'
               }`}
             >
               {art}
@@ -219,7 +219,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
           {hasActiveFilters && (
             <button
               onClick={onClearFilters}
-              className="ml-auto text-[11px] text-[#D4AF37] hover:underline font-medium cursor-pointer"
+              className="ml-auto text-[11px] text-[#BF092F] hover:underline font-medium cursor-pointer"
             >
               Limpiar filtros
             </button>
@@ -233,7 +233,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
             <button
               key={sug}
               onClick={() => setSearchQuery(sug)}
-              className="text-[11px] px-2 py-0.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] text-[#888] hover:text-[#D4AF37] border border-[#222226] transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] text-[#888] hover:text-[#BF092F] border border-[#222226] transition-colors"
             >
               {sug}
             </button>
@@ -243,7 +243,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({
         {/* Results count banner */}
         <div className="flex items-center justify-between text-xs text-[#666] pt-2 border-t border-[#222226]">
           <div>
-            Mostrando <span className="font-semibold text-[#D4AF37]">{totalResultsCount}</span> obras y tesis doctrinales
+            Mostrando <span className="font-semibold text-[#BF092F]">{totalResultsCount}</span> obras y tesis doctrinales
             {selectedCategory !== 'TODAS' && ` en ${selectedCategory}`}
             {selectedArticle && ` vinculadas a ${selectedArticle}`}
           </div>

@@ -31,16 +31,16 @@ export const AuthBanner: React.FC<AuthBannerProps> = ({
       <div className="bg-[#111114] border-b border-[#222226] text-[#D1D1D1] px-4 py-2.5 shadow-inner">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
           <div className="flex items-center space-x-2">
-            <HardDrive className="w-4 h-4 text-[#D4AF37] flex-shrink-0" />
+            <HardDrive className="w-4 h-4 text-[#BF092F] flex-shrink-0" />
             <span>
-              <strong className="text-[#D4AF37]">[Admin] Conecta tu Google Drive:</strong> Vincula tu carpeta <span className="underline font-semibold text-white">"Tributario"</span> para sincronizar e indexar libros y documentos para todos los usuarios.
+              <strong className="text-[#BF092F]">[Admin] Conecta tu Google Drive:</strong> Vincula tu carpeta <span className="underline font-semibold text-white">"Tributario"</span> para sincronizar e indexar libros y documentos para todos los usuarios.
             </span>
           </div>
 
           <button
             onClick={onLogin}
             disabled={isLoggingIn}
-            className="inline-flex items-center space-x-1.5 px-3 py-1 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors whitespace-nowrap shadow disabled:opacity-50"
+            className="inline-flex items-center space-x-1.5 px-3 py-1 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors whitespace-nowrap shadow disabled:opacity-50"
           >
             <span>{isLoggingIn ? 'Conectando...' : 'Conectar Google Drive'}</span>
             <ArrowRight className="w-3.5 h-3.5" />

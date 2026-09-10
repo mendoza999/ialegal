@@ -138,7 +138,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-[#222226] flex items-center justify-between bg-[#16161A]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A1A1E] border border-[#D4AF37] flex items-center justify-center text-[#D4AF37] shadow">
+            <div className="w-10 h-10 rounded-xl bg-[#1A1A1E] border border-[#BF092F] flex items-center justify-center text-[#BF092F] shadow">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
@@ -146,7 +146,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                 <h2 className="text-base font-serif font-bold text-white">
                   Panel de Gestión de Usuarios & Roles
                 </h2>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-[#D4AF37] text-[#0A0A0C] font-bold uppercase tracking-wider">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-[#BF092F] text-[#0A0A0C] font-bold uppercase tracking-wider">
                   Acceso Admin
                 </span>
               </div>
@@ -172,9 +172,9 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
               <strong className="text-white font-mono">{users.length}</strong>
             </div>
             <div className="flex items-center space-x-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <ShieldCheck className="w-3.5 h-3.5 text-[#BF092F]" />
               <span className="text-[#888]">Admins:</span>
-              <strong className="text-[#D4AF37] font-mono">{adminCount}</strong>
+              <strong className="text-[#BF092F] font-mono">{adminCount}</strong>
             </div>
             <div className="flex items-center space-x-1.5">
               <UserIcon className="w-3.5 h-3.5 text-sky-400" />
@@ -185,7 +185,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
 
           <button
             onClick={() => setIsCreating(!isCreating)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] border border-[#D4AF37]/50 text-[#D4AF37] text-xs font-semibold transition-colors"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] border border-[#BF092F]/50 text-[#BF092F] text-xs font-semibold transition-colors"
           >
             <UserPlus className="w-3.5 h-3.5" />
             <span>{isCreating ? 'Cancelar' : 'Nuevo Usuario'}</span>
@@ -223,9 +223,9 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
           
           {/* Create User Sub-Form */}
           {isCreating && (
-            <form onSubmit={handleCreateUserSubmit} className="bg-[#16161A] border border-[#D4AF37]/40 rounded-xl p-4 space-y-3 animate-fadeIn">
+            <form onSubmit={handleCreateUserSubmit} className="bg-[#16161A] border border-[#BF092F]/40 rounded-xl p-4 space-y-3 animate-fadeIn">
               <div className="flex items-center justify-between pb-2 border-b border-[#222226]">
-                <span className="font-bold text-xs text-[#D4AF37] uppercase tracking-wider flex items-center space-x-1.5">
+                <span className="font-bold text-xs text-[#BF092F] uppercase tracking-wider flex items-center space-x-1.5">
                   <UserPlus className="w-4 h-4" />
                   <span>Crear Usuario desde Panel Administrador</span>
                 </span>
@@ -247,7 +247,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Ej. Dr. Mario Alva Matteucci"
-                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#BF092F]"
                   />
                 </div>
 
@@ -259,7 +259,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     placeholder="correo@tributario.pe"
-                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#BF092F]"
                   />
                 </div>
 
@@ -271,7 +271,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Mínimo 6 caracteres"
-                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#BF092F]"
                   />
                 </div>
 
@@ -280,7 +280,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                   <select
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value as UserRole)}
-                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2 bg-[#111114] border border-[#222226] rounded-lg text-white focus:outline-none focus:border-[#BF092F]"
                   >
                     <option value="usuario">Usuario (Investigador)</option>
                     <option value="admin">Administrador (Control Total)</option>
@@ -291,7 +291,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
               <div className="flex justify-end pt-1">
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider"
+                  className="px-4 py-2 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider"
                 >
                   Registrar Usuario
                 </button>
@@ -321,7 +321,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                         <div className="flex items-center space-x-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
                             isUserAdmin 
-                              ? 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]' 
+                              ? 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]' 
                               : 'bg-[#16161A] text-sky-400 border border-sky-600/40'
                           }`}>
                             {u.name.charAt(0).toUpperCase()}
@@ -349,7 +349,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                           title="Haz clic para cambiar el rol de este usuario"
                           className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${
                             isUserAdmin
-                              ? 'bg-[#1A1A1E] text-[#D4AF37] border-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0A0A0C]'
+                              ? 'bg-[#1A1A1E] text-[#BF092F] border-[#BF092F] hover:bg-[#BF092F] hover:text-[#0A0A0C]'
                               : 'bg-[#16161A] text-sky-400 border-sky-600/40 hover:bg-sky-500 hover:text-black'
                           }`}
                         >
@@ -368,7 +368,7 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                           {/* Reset Password Button */}
                           <button
                             onClick={() => setResettingUserId(resettingUserId === u.id ? null : u.id)}
-                            className="p-1.5 rounded bg-[#16161A] hover:bg-[#222226] text-[#888] hover:text-[#D4AF37] border border-[#222226] transition-colors"
+                            className="p-1.5 rounded bg-[#16161A] hover:bg-[#222226] text-[#888] hover:text-[#BF092F] border border-[#222226] transition-colors"
                             title="Restablecer contraseña"
                           >
                             <KeyRound className="w-3.5 h-3.5" />
@@ -388,8 +388,8 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
 
                         {/* Reset password sub-row */}
                         {resettingUserId === u.id && (
-                          <div className="mt-2 p-2 bg-[#1A1A1E] border border-[#D4AF37]/50 rounded-lg text-left space-y-2 animate-fadeIn">
-                            <div className="text-[10px] text-[#D4AF37] font-semibold">
+                          <div className="mt-2 p-2 bg-[#1A1A1E] border border-[#BF092F]/50 rounded-lg text-left space-y-2 animate-fadeIn">
+                            <div className="text-[10px] text-[#BF092F] font-semibold">
                               Nueva clave para {u.name}:
                             </div>
                             <div className="flex space-x-2">
@@ -398,11 +398,11 @@ export const AdminUsersModal: React.FC<AdminUsersModalProps> = ({
                                 value={newPasswordValue}
                                 onChange={(e) => setNewPasswordValue(e.target.value)}
                                 placeholder="Nueva clave (min 6 car.)"
-                                className="flex-1 px-2.5 py-1 bg-[#111114] border border-[#222226] rounded text-white text-xs focus:outline-none focus:border-[#D4AF37]"
+                                className="flex-1 px-2.5 py-1 bg-[#111114] border border-[#222226] rounded text-white text-xs focus:outline-none focus:border-[#BF092F]"
                               />
                               <button
                                 onClick={() => handleResetPasswordSubmit(u.id)}
-                                className="px-3 py-1 bg-[#D4AF37] text-[#0A0A0C] font-bold text-[10px] uppercase rounded"
+                                className="px-3 py-1 bg-[#BF092F] text-[#0A0A0C] font-bold text-[10px] uppercase rounded"
                               >
                                 Guardar
                               </button>

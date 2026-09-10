@@ -961,9 +961,9 @@ function renderHtmlDocumentViewer(doc: TaxDocument, chunks: DocumentChunk[]): st
       --border: #334155;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --accent: #d97706;
-      --badge-bg: #451a03;
-      --badge-text: #fcd34d;
+      --accent: #BF092F;
+      --badge-bg: #4A0A18;
+      --badge-text: #FBD5DC;
     }
     @media (prefers-color-scheme: light) {
       :root {

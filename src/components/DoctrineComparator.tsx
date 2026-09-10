@@ -80,7 +80,7 @@ export const DoctrineComparator: React.FC = () => {
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-serif font-bold text-white flex items-center space-x-2">
-          <GitCompare className="w-6 h-6 text-[#D4AF37]" />
+          <GitCompare className="w-6 h-6 text-[#BF092F]" />
           <span>Comparador de Posturas Doctrinales & Dogmáticas</span>
         </h1>
         <p className="text-sm text-[#888]">
@@ -106,8 +106,8 @@ export const DoctrineComparator: React.FC = () => {
                 }}
                 className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                   topic === item.topic && !customTopic
-                    ? 'bg-[#1A1A1E] border-[#D4AF37] shadow'
-                    : 'bg-[#16161A] border-[#222226] hover:border-[#D4AF37]/50'
+                    ? 'bg-[#1A1A1E] border-[#BF092F] shadow'
+                    : 'bg-[#16161A] border-[#222226] hover:border-[#BF092F]/50'
                 }`}
               >
                 <div>
@@ -126,7 +126,7 @@ export const DoctrineComparator: React.FC = () => {
                     setCustomTopic('');
                     handleCompare(item.topic);
                   }}
-                  className="ml-3 px-3 py-1.5 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider whitespace-nowrap"
+                  className="ml-3 px-3 py-1.5 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider whitespace-nowrap"
                 >
                   Comparar
                 </button>
@@ -146,12 +146,12 @@ export const DoctrineComparator: React.FC = () => {
               value={customTopic}
               onChange={(e) => setCustomTopic(e.target.value)}
               placeholder="Ej: Postura sobre la deducibilidad de gastos de vehículos de dirección: Ruiz de Castilla vs Criterio SUNAT..."
-              className="flex-1 px-4 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-xs sm:text-sm text-white placeholder-[#555] focus:outline-none focus:border-[#D4AF37]"
+              className="flex-1 px-4 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-xs sm:text-sm text-white placeholder-[#555] focus:outline-none focus:border-[#BF092F]"
             />
             <button
               onClick={() => handleCompare(customTopic)}
               disabled={isLoading || (!customTopic && !topic)}
-              className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors disabled:opacity-50 shadow"
+              className="px-5 py-2.5 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors disabled:opacity-50 shadow"
             >
               {isLoading ? 'Generando...' : 'Analizar'}
             </button>
@@ -171,7 +171,7 @@ export const DoctrineComparator: React.FC = () => {
         <div className="bg-[#111114] rounded-2xl border border-[#222226] shadow-xl p-6 sm:p-8 space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-[#222226] flex-wrap gap-2">
             <div className="flex items-center space-x-2">
-              <Scale className="w-5 h-5 text-[#D4AF37]" />
+              <Scale className="w-5 h-5 text-[#BF092F]" />
               <h2 className="text-base font-serif font-bold text-white">
                 Dictamen Comparativo Doctrinal
               </h2>

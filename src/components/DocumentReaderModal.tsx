@@ -128,7 +128,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
         {/* Modal Header */}
         <div className="bg-[#0D0D10] text-[#D1D1D1] px-5 py-3.5 flex items-center justify-between border-b border-[#222226]">
           <div className="flex items-center space-x-3 truncate">
-            <div className="w-8 h-8 rounded-lg bg-[#16161A] border border-[#D4AF37]/60 flex items-center justify-center text-[#D4AF37] flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#16161A] border border-[#BF092F]/60 flex items-center justify-center text-[#BF092F] flex-shrink-0">
               <BookOpen className="w-4 h-4" />
             </div>
             <div className="truncate">
@@ -146,7 +146,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               href={docInfo.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow"
               title={`Abrir documento original en ${docInfo.label}`}
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -181,7 +181,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               onClick={() => setActiveTab('reader')}
               className={`px-3 py-1 rounded-lg font-semibold transition-colors flex items-center space-x-1.5 ${
                 activeTab === 'reader'
-                  ? 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]/50'
+                  ? 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]/50'
                   : 'bg-[#16161A] text-[#888] hover:text-white border border-[#222226]'
               }`}
             >
@@ -193,7 +193,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               onClick={() => setActiveTab('document')}
               className={`px-3 py-1 rounded-lg font-semibold transition-colors flex items-center space-x-1.5 ${
                 activeTab === 'document'
-                  ? 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]/50'
+                  ? 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]/50'
                   : 'bg-[#16161A] text-[#888] hover:text-white border border-[#222226]'
               }`}
             >
@@ -209,19 +209,19 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                 <div className="flex items-center space-x-1 bg-[#16161A] rounded p-0.5 border border-[#222226]">
                   <button
                     onClick={() => setFontSize('normal')}
-                    className={`px-2 py-0.5 rounded text-xs ${fontSize === 'normal' ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold' : 'text-[#888] hover:text-white'}`}
+                    className={`px-2 py-0.5 rounded text-xs ${fontSize === 'normal' ? 'bg-[#BF092F] text-[#0A0A0C] font-bold' : 'text-[#888] hover:text-white'}`}
                   >
                     A
                   </button>
                   <button
                     onClick={() => setFontSize('large')}
-                    className={`px-2 py-0.5 rounded text-xs ${fontSize === 'large' ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold' : 'text-[#888] hover:text-white'}`}
+                    className={`px-2 py-0.5 rounded text-xs ${fontSize === 'large' ? 'bg-[#BF092F] text-[#0A0A0C] font-bold' : 'text-[#888] hover:text-white'}`}
                   >
                     A+
                   </button>
                   <button
                     onClick={() => setFontSize('xl')}
-                    className={`px-2 py-0.5 rounded text-xs ${fontSize === 'xl' ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold' : 'text-[#888] hover:text-white'}`}
+                    className={`px-2 py-0.5 rounded text-xs ${fontSize === 'xl' ? 'bg-[#BF092F] text-[#0A0A0C] font-bold' : 'text-[#888] hover:text-white'}`}
                   >
                     A++
                   </button>
@@ -230,17 +230,17 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => setReadingTheme('light')}
-                    className={`w-5 h-5 rounded-full bg-[#1A1A1E] border ${readingTheme === 'light' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/50' : 'border-[#333]'}`}
+                    className={`w-5 h-5 rounded-full bg-[#1A1A1E] border ${readingTheme === 'light' ? 'border-[#BF092F] ring-2 ring-[#BF092F]/50' : 'border-[#333]'}`}
                     title="Modo Carbón"
                   />
                   <button
                     onClick={() => setReadingTheme('sepia')}
-                    className={`w-5 h-5 rounded-full bg-[#2B2317] border ${readingTheme === 'sepia' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/50' : 'border-[#333]'}`}
+                    className={`w-5 h-5 rounded-full bg-[#2B2317] border ${readingTheme === 'sepia' ? 'border-[#BF092F] ring-2 ring-[#BF092F]/50' : 'border-[#333]'}`}
                     title="Modo Sepia"
                   />
                   <button
                     onClick={() => setReadingTheme('dark')}
-                    className={`w-5 h-5 rounded-full bg-[#050507] border ${readingTheme === 'dark' ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/50' : 'border-[#333]'}`}
+                    className={`w-5 h-5 rounded-full bg-[#050507] border ${readingTheme === 'dark' ? 'border-[#BF092F] ring-2 ring-[#BF092F]/50' : 'border-[#333]'}`}
                     title="Modo Negro Puro"
                   />
                 </div>
@@ -259,7 +259,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               onClick={() => onSaveCitation(entry, userNote)}
               className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded font-medium transition-colors ${
                 isSaved
-                  ? 'bg-[#1A1A1E] border border-[#D4AF37] text-[#D4AF37]'
+                  ? 'bg-[#1A1A1E] border border-[#BF092F] text-[#BF092F]'
                   : 'bg-[#16161A] hover:bg-[#1A1A1E] border border-[#222226] text-[#CCC]'
               }`}
             >
@@ -300,7 +300,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                     href={docInfo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1 px-3.5 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider flex-shrink-0 transition-colors shadow"
+                    className="inline-flex items-center space-x-1 px-3.5 py-2 rounded-xl bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider flex-shrink-0 transition-colors shadow"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Abrir en Google Drive</span>
@@ -318,7 +318,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                   </div>
                 ) : (
                   <div className="w-full h-[65vh] rounded-xl overflow-hidden border border-[#222226] bg-[#0E0E11] p-6 flex flex-col items-center justify-center text-center space-y-4">
-                    <HardDrive className="w-12 h-12 text-[#D4AF37]" />
+                    <HardDrive className="w-12 h-12 text-[#BF092F]" />
                     <div className="max-w-md space-y-2">
                       <h3 className="text-base font-serif font-bold text-white">
                         Archivo en Repositorio Tributario (Google Drive)
@@ -331,7 +331,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                       href={docInfo.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow-lg"
+                      className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow-lg"
                     >
                       <ExternalLink className="w-4 h-4" />
                       <span>Ver Archivo en Google Drive</span>
@@ -344,14 +344,14 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               <div className="space-y-6">
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-[#D4AF37]">
+                    <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-[#BF092F]">
                       {entry.category} • {entry.institution}
                     </span>
                     <a
                       href={docInfo.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1 text-[11px] text-[#D4AF37] hover:text-[#f2cd5b] font-mono"
+                      className="inline-flex items-center space-x-1 text-[11px] text-[#BF092F] hover:text-[#F0A9B8] font-mono"
                     >
                       <span>{docInfo.label}</span>
                       <ExternalLink className="w-3 h-3" />
@@ -368,9 +368,9 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                 </div>
 
                 {/* Ratio Dogmática Box */}
-                <div className="bg-[#16161A] border-l-2 border-[#D4AF37] p-4 rounded-r-xl space-y-1.5">
-                  <div className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] flex items-center space-x-1.5">
-                    <Scale className="w-4 h-4 text-[#D4AF37]" />
+                <div className="bg-[#16161A] border-l-2 border-[#BF092F] p-4 rounded-r-xl space-y-1.5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#BF092F] flex items-center space-x-1.5">
+                    <Scale className="w-4 h-4 text-[#BF092F]" />
                     <span>Ratio Dogmática y Tesis de la Obra:</span>
                   </div>
                   <p className="font-serif italic text-[#EDEDED] leading-relaxed text-sm sm:text-base">
@@ -402,7 +402,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                         href={getArticleSearchUrl(art)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1 bg-[#16161A] hover:bg-[#1A1A1E] rounded-lg text-xs font-mono font-medium text-[#CCC] hover:text-[#D4AF37] border border-[#222226] hover:border-[#D4AF37]/50 transition-colors inline-flex items-center space-x-1.5"
+                        className="px-3 py-1 bg-[#16161A] hover:bg-[#1A1A1E] rounded-lg text-xs font-mono font-medium text-[#CCC] hover:text-[#BF092F] border border-[#222226] hover:border-[#BF092F]/50 transition-colors inline-flex items-center space-x-1.5"
                         title={`Consultar texto oficial de ${art}`}
                       >
                         <span>📜 {art}</span>
@@ -450,7 +450,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[#888] font-bold">
                   Referencia al Documento Fuente
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-[#1A1A1E] text-[#D4AF37] border border-[#222226]">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-[#1A1A1E] text-[#BF092F] border border-[#222226]">
                   {docInfo.label}
                 </span>
               </div>
@@ -459,10 +459,10 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                   href={docInfo.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-serif font-bold text-white hover:text-[#D4AF37] transition-colors inline-flex items-baseline space-x-1"
+                  className="font-serif font-bold text-white hover:text-[#BF092F] transition-colors inline-flex items-baseline space-x-1"
                 >
                   <span>{entry.title}</span>
-                  <ExternalLink className="w-3 h-3 text-[#D4AF37] inline ml-1" />
+                  <ExternalLink className="w-3 h-3 text-[#BF092F] inline ml-1" />
                 </a>
                 <p className="text-[11px] text-[#888]">
                   {entry.author} ({entry.year}) {entry.publisher ? `— ${entry.publisher}` : ''}
@@ -472,7 +472,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                     href={docInfo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-1.5 px-3 rounded bg-[#1A1A1E] hover:bg-[#222228] text-[#D4AF37] hover:text-[#f4d166] border border-[#D4AF37]/30 text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
+                    className="w-full py-1.5 px-3 rounded bg-[#1A1A1E] hover:bg-[#222228] text-[#BF092F] hover:text-[#F6C3CD] border border-[#BF092F]/30 text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Ver Documento Original</span>
@@ -485,13 +485,13 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
             <div className="bg-[#16161A] p-4 rounded-xl border border-[#222226] shadow-md space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+                  <Sparkles className="w-5 h-5 text-[#BF092F]" />
                   <h3 className="text-sm font-bold text-white">Ficha Doctrinal Estructurada (IA)</h3>
                 </div>
                 <button
                   onClick={handleGenerateAiFicha}
                   disabled={isGeneratingFicha}
-                  className="px-3 py-1.5 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center space-x-1.5 shadow"
+                  className="px-3 py-1.5 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center space-x-1.5 shadow"
                 >
                   <Sparkles className={`w-3.5 h-3.5 ${isGeneratingFicha ? 'animate-spin' : ''}`} />
                   <span>{isGeneratingFicha ? 'Analizando...' : aiFicha ? 'Regenerar' : 'Extraer Ficha'}</span>
@@ -507,7 +507,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               {aiFicha ? (
                 <div className="space-y-3 pt-2 text-xs text-[#CCC]">
                   <div className="bg-[#0E0E11] p-3 rounded-lg border border-[#222226]">
-                    <span className="font-bold text-[#D4AF37] block mb-1 font-mono uppercase text-[10px]">Ratio Decidendi / Tesis:</span>
+                    <span className="font-bold text-[#BF092F] block mb-1 font-mono uppercase text-[10px]">Ratio Decidendi / Tesis:</span>
                     <p className="italic font-serif text-white">{aiFicha.ratioDoctrinal}</p>
                   </div>
 
@@ -525,7 +525,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
 
                   {aiFicha.citacionAPA && (
                     <div className="bg-[#0E0E11] p-2.5 rounded border border-[#222226] font-mono text-[11px] text-[#888]">
-                      <span className="font-bold text-[#D4AF37] block mb-0.5">Citación Jurídica Formal:</span>
+                      <span className="font-bold text-[#BF092F] block mb-0.5">Citación Jurídica Formal:</span>
                       {aiFicha.citacionAPA}
                     </div>
                   )}
@@ -547,11 +547,11 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                 value={userNote}
                 onChange={(e) => setUserNote(e.target.value)}
                 placeholder="Escribe tus notas, argumentos para tu recurso de reclamación/apelación o reflexiones doctrinales sobre este autor..."
-                className="w-full h-28 p-3 text-xs bg-[#0E0E11] text-[#CCC] placeholder-[#555] border border-[#222226] rounded-lg focus:outline-none focus:border-[#D4AF37] font-sans"
+                className="w-full h-28 p-3 text-xs bg-[#0E0E11] text-[#CCC] placeholder-[#555] border border-[#222226] rounded-lg focus:outline-none focus:border-[#BF092F] font-sans"
               />
               <button
                 onClick={() => onSaveCitation(entry, userNote)}
-                className="w-full py-2 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded transition-colors flex items-center justify-center space-x-2 shadow"
+                className="w-full py-2 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded transition-colors flex items-center justify-center space-x-2 shadow"
               >
                 <Bookmark className="w-3.5 h-3.5 fill-current" />
                 <span>Guardar Apuntes en Mis Citas</span>

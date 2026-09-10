@@ -120,7 +120,7 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-serif font-bold text-white flex items-center space-x-2">
-            <Bookmark className="w-6 h-6 text-[#D4AF37] fill-current" />
+            <Bookmark className="w-6 h-6 text-[#BF092F] fill-current" />
             <span>Mis Citas & Fichas Doctrinales Guardadas</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#888]">
@@ -140,7 +140,7 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
 
             <button
               onClick={handleDownloadFile}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider shadow transition-colors"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider shadow transition-colors"
             >
               <Download className="w-4 h-4 text-[#0A0A0C]" />
               <span>Exportar (.MD)</span>
@@ -178,7 +178,7 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
             return (
               <div
                 key={c.id}
-                className="bg-[#111114] rounded-xl border border-[#222226] p-5 shadow-lg space-y-4 hover:border-[#D4AF37]/50 transition-colors"
+                className="bg-[#111114] rounded-xl border border-[#222226] p-5 shadow-lg space-y-4 hover:border-[#BF092F]/50 transition-colors"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -186,10 +186,10 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
                       href={docInfo.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-base sm:text-lg font-serif font-bold text-white hover:text-[#D4AF37] transition-colors inline-flex items-baseline space-x-1.5 group"
+                      className="text-base sm:text-lg font-serif font-bold text-white hover:text-[#BF092F] transition-colors inline-flex items-baseline space-x-1.5 group"
                     >
                       <span>{c.title}</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-[#888] group-hover:text-[#D4AF37] inline opacity-70" />
+                      <ExternalLink className="w-3.5 h-3.5 text-[#888] group-hover:text-[#BF092F] inline opacity-70" />
                     </a>
                     <div className="text-xs text-[#888] mt-0.5 flex items-center space-x-2 flex-wrap">
                       <span className="font-semibold text-[#CCC]">{c.author}</span>
@@ -228,7 +228,7 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
                     href={docInfo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow"
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Ver Documento Original</span>
@@ -239,7 +239,7 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
                       onClick={() => onOpenReader(entryForReader)}
                       className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-[#16161A] hover:bg-[#1A1A1E] text-[#CCC] hover:text-white border border-[#222226] text-xs font-semibold transition-colors"
                     >
-                      <BookOpen className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <BookOpen className="w-3.5 h-3.5 text-[#BF092F]" />
                       <span>Abrir en Visor Integrado</span>
                     </button>
                   )}
@@ -251,7 +251,7 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
                 </div>
 
                 {/* APA Citation Box with Hyperlinked Source */}
-                <div className="bg-[#0E0E11] p-3 rounded-lg border border-[#222226] text-xs font-mono text-[#D4AF37] space-y-1">
+                <div className="bg-[#0E0E11] p-3 rounded-lg border border-[#222226] text-xs font-mono text-[#BF092F] space-y-1">
                   <span className="font-bold text-[#888] block font-sans uppercase text-[10px]">
                     Citación Formal Referenciada:
                   </span>
@@ -261,7 +261,7 @@ export const SavedCitationsModal: React.FC<SavedCitationsModalProps> = ({
                       href={docInfo.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline text-[#D4AF37] hover:text-[#f6d773] inline-flex items-center space-x-1"
+                      className="underline text-[#BF092F] hover:text-[#F8CDD6] inline-flex items-center space-x-1"
                     >
                       <span>Recuperado de Google Drive (Carpeta Tributario): {docInfo.url}</span>
                       <ExternalLink className="w-2.5 h-2.5 inline ml-0.5" />

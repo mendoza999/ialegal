@@ -106,7 +106,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-[#222226] flex items-center justify-between bg-[#16161A]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A1A1E] border border-[#D4AF37] flex items-center justify-center text-[#D4AF37] shadow">
+            <div className="w-10 h-10 rounded-xl bg-[#1A1A1E] border border-[#BF092F] flex items-center justify-center text-[#BF092F] shadow">
               <BookPlus className="w-5 h-5" />
             </div>
             <div>
@@ -114,7 +114,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 <h2 className="text-base font-serif font-bold text-white">
                   Agregar Obra al Repertorio Doctrinal
                 </h2>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-[#D4AF37] text-[#0A0A0C] font-bold uppercase">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-[#BF092F] text-[#0A0A0C] font-bold uppercase">
                   Privilegio Admin
                 </span>
               </div>
@@ -153,7 +153,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ej. La Hipótesis de Incidencia Tributaria"
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               />
             </div>
 
@@ -165,7 +165,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 type="number"
                 value={year}
                 onChange={(e) => setYear(parseInt(e.target.value) || 2024)}
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               />
             </div>
           </div>
@@ -181,7 +181,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Ej. Geraldo Ataliba / Jorge Bravo Cucci"
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               />
             </div>
 
@@ -192,7 +192,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as TaxCategory)}
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -213,7 +213,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
                 placeholder="Ej. Hecho Imponible / Causalidad / Devengado"
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               />
             </div>
 
@@ -226,7 +226,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 value={linkedArticles}
                 onChange={(e) => setLinkedArticles(e.target.value)}
                 placeholder="Ej. Art. 37 LIR, Art. 57 LIR, Art. 62 Código Tributario"
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               />
             </div>
           </div>
@@ -241,7 +241,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
               value={ratioDoctrinal}
               onChange={(e) => setRatioDoctrinal(e.target.value)}
               placeholder="Resume la tesis dogmática central sostenida por el autor respecto a la controversia o institución..."
-              className="w-full p-3 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+              className="w-full p-3 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
             />
           </div>
 
@@ -254,7 +254,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
               value={keyExcerpt}
               onChange={(e) => setKeyExcerpt(e.target.value)}
               placeholder="Cita textual de la obra para fines de fundamentación jurídica y citación..."
-              className="w-full p-3 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+              className="w-full p-3 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
             />
           </div>
 
@@ -268,7 +268,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
                 placeholder="Ej. Causalidad, Gasto deducible, SUNAT"
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               />
             </div>
 
@@ -281,14 +281,14 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 value={jurisprudence}
                 onChange={(e) => setJurisprudence(e.target.value)}
                 placeholder="Ej. RTF 01234-1-2022, STC 00022-2020-PI"
-                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               />
             </div>
           </div>
 
           {/* Google Drive Repository Links & Editorial */}
           <div className="p-3.5 bg-[#16161A] rounded-xl border border-[#222226] space-y-3">
-            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#D4AF37] flex items-center space-x-1.5">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#BF092F] flex items-center space-x-1.5">
               <span>📁 Repositorio Google Drive (Carpeta Tributario)</span>
             </div>
             
@@ -302,7 +302,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                   value={driveFileIdOrUrl}
                   onChange={(e) => setDriveFileIdOrUrl(e.target.value)}
                   placeholder="https://drive.google.com/file/d/1Abc..."
-                  className="w-full px-3 py-2 bg-[#0E0E11] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37] text-xs font-mono"
+                  className="w-full px-3 py-2 bg-[#0E0E11] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F] text-xs font-mono"
                 />
               </div>
 
@@ -315,7 +315,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                   value={drivePath}
                   onChange={(e) => setDrivePath(e.target.value)}
                   placeholder="Mi unidad / Tributario / ..."
-                  className="w-full px-3 py-2 bg-[#0E0E11] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37] text-xs"
+                  className="w-full px-3 py-2 bg-[#0E0E11] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F] text-xs"
                 />
               </div>
             </div>
@@ -329,7 +329,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 value={publisher}
                 onChange={(e) => setPublisher(e.target.value)}
                 placeholder="Ej. Fondo Editorial Jurídico / Editorial Themis"
-                className="w-full px-3 py-2 bg-[#0E0E11] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#D4AF37] text-xs"
+                className="w-full px-3 py-2 bg-[#0E0E11] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F] text-xs"
               />
             </div>
           </div>
@@ -344,7 +344,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider shadow"
+              className="px-5 py-2.5 rounded-xl bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider shadow"
             >
               Guardar en Repertorio
             </button>

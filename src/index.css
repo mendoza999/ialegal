@@ -1,3 +1,19 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ponytail: amber-* resuelve a carmesí de marca (algoritmojuridico.com: #BF092F).
+   Un solo mapeo cubre ~300 utilidades sin tocar componentes. Quitar si se renombran clases. */
+@theme {
+  --color-amber-50: #FDF2F4;
+  --color-amber-100: #FBE4E9;
+  --color-amber-200: #F6C3CD;
+  --color-amber-300: #EE94A6;
+  --color-amber-400: #E15E78;
+  --color-amber-500: #CE2F4E;
+  --color-amber-600: #BF092F;
+  --color-amber-700: #A10727;
+  --color-amber-800: #7F0B23;
+  --color-amber-900: #61101F;
+  --color-amber-950: #3F0713;
+}

@@ -69,7 +69,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
       return (
         <div className="max-w-4xl mx-auto py-12 px-4 text-center">
           <div className="bg-[#111114] rounded-2xl border border-[#222226] p-8 sm:p-12 shadow-xl space-y-6">
-            <div className="w-16 h-16 bg-[#1A1A1E] text-[#D4AF37] border border-[#222226] rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 bg-[#1A1A1E] text-[#BF092F] border border-[#222226] rounded-2xl flex items-center justify-center mx-auto shadow-inner">
               <HardDrive className="w-8 h-8" />
             </div>
             
@@ -78,12 +78,12 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                 Biblioteca Digital de Google Drive
               </h2>
               <p className="text-[#888] text-sm leading-relaxed">
-                La sincronización con Google Drive está restringida al <strong className="text-[#D4AF37]">Administrador del Sistema</strong>. Cuando un administrador vincule la carpeta <strong className="text-white">"Tributario"</strong>, todo el catálogo doctrinal estará disponible para consulta de los usuarios.
+                La sincronización con Google Drive está restringida al <strong className="text-[#BF092F]">Administrador del Sistema</strong>. Cuando un administrador vincule la carpeta <strong className="text-white">"Tributario"</strong>, todo el catálogo doctrinal estará disponible para consulta de los usuarios.
               </p>
             </div>
 
             <div className="p-3.5 bg-[#16161A] border border-[#222226] rounded-xl text-xs text-[#888] max-w-md mx-auto flex items-center justify-center space-x-2">
-              <AlertTriangle className="w-4 h-4 text-[#D4AF37] flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-[#BF092F] flex-shrink-0" />
               <span>Inicie sesión como administrador para vincular o actualizar los libros en la nube.</span>
             </div>
           </div>
@@ -94,19 +94,19 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
     return (
       <div className="max-w-4xl mx-auto py-12 px-4 text-center">
         <div className="bg-[#111114] rounded-2xl border border-[#222226] p-8 sm:p-12 shadow-xl space-y-6">
-          <div className="w-16 h-16 bg-[#1A1A1E] text-[#D4AF37] border border-[#222226] rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+          <div className="w-16 h-16 bg-[#1A1A1E] text-[#BF092F] border border-[#222226] rounded-2xl flex items-center justify-center mx-auto shadow-inner">
             <HardDrive className="w-8 h-8" />
           </div>
           
           <div className="space-y-2 max-w-md mx-auto">
-            <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 text-[10px] font-bold uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-[#BF092F]/10 text-[#BF092F] border border-[#BF092F]/30 text-[10px] font-bold uppercase tracking-wider mb-2">
               Privilegio de Administrador
             </div>
             <h2 className="text-2xl font-serif font-bold text-white">
               Conecta tu Google Drive
             </h2>
             <p className="text-[#888] text-sm">
-              Como administrador, vincula tu carpeta <strong className="text-[#D4AF37]">"Tributario"</strong> para leer, indexar y disponibilizar libros, manuales, jurisprudencia y doctrina para todos los investigadores del portal.
+              Como administrador, vincula tu carpeta <strong className="text-[#BF092F]">"Tributario"</strong> para leer, indexar y disponibilizar libros, manuales, jurisprudencia y doctrina para todos los investigadores del portal.
             </p>
           </div>
 
@@ -114,7 +114,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
             <button
               onClick={onLogin}
               disabled={isLoggingIn}
-              className="inline-flex items-center justify-center bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold px-6 py-3 rounded text-xs uppercase tracking-wider shadow-lg transition-all space-x-3 disabled:opacity-50"
+              className="inline-flex items-center justify-center bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold px-6 py-3 rounded text-xs uppercase tracking-wider shadow-lg transition-all space-x-3 disabled:opacity-50"
             >
               <span>{isLoggingIn ? 'Iniciando autorización...' : 'Autorizar y Conectar Carpeta "Tributario"'}</span>
             </button>
@@ -136,7 +136,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-xl bg-[#1A1A1E] text-[#D4AF37] border border-[#222226] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#1A1A1E] text-[#BF092F] border border-[#222226] flex items-center justify-center">
               <FolderOpen className="w-6 h-6" />
             </div>
             <div>
@@ -159,7 +159,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
           <div className="flex items-center flex-wrap gap-2">
             <button
               onClick={onIndexAllDriveFiles}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider transition-colors shadow"
               title="Indexar todos los libros para que aparezcan en el buscador principal con su ratio dogmática"
             >
               <Sparkles className="w-4 h-4 text-[#0A0A0C]" />
@@ -169,10 +169,10 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
             <button
               onClick={onRefresh}
               disabled={isLoading}
-              className="p-2 rounded border border-[#222226] bg-[#16161A] text-[#888] hover:text-white text-xs transition-colors hover:border-[#D4AF37]/50"
+              className="p-2 rounded border border-[#222226] bg-[#16161A] text-[#888] hover:text-white text-xs transition-colors hover:border-[#BF092F]/50"
               title="Actualizar archivos de Drive"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#D4AF37]' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#BF092F]' : ''}`} />
             </button>
           </div>
 
@@ -189,7 +189,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                   onClick={() => onSelectTributarioFolder(f)}
                   className={`px-2.5 py-1 rounded border font-medium transition-colors ${
                     currentFolder?.id === f.id
-                      ? 'bg-[#1A1A1E] text-[#D4AF37] border-[#D4AF37] font-bold'
+                      ? 'bg-[#1A1A1E] text-[#BF092F] border-[#BF092F] font-bold'
                       : 'bg-[#16161A] text-[#888] border-[#222226] hover:text-white'
                   }`}
                 >
@@ -210,12 +210,12 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
               onChange={(e) => setSearchInDrive(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onPerformDriveSearch()}
               placeholder="Buscar dentro de tu carpeta Tributario (título o texto en PDFs/Docs)..."
-              className="w-full pl-9 pr-4 py-2 bg-[#16161A] text-[#FFF] placeholder-[#555] border border-[#222226] rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37]"
+              className="w-full pl-9 pr-4 py-2 bg-[#16161A] text-[#FFF] placeholder-[#555] border border-[#222226] rounded-lg text-xs sm:text-sm focus:outline-none focus:border-[#BF092F]"
             />
           </div>
           <button
             onClick={onPerformDriveSearch}
-            className="px-4 py-2 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider rounded transition-colors"
+            className="px-4 py-2 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider rounded transition-colors"
           >
             Buscar en Drive
           </button>
@@ -235,7 +235,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
 
           <button
             onClick={() => onNavigateFolder(null)}
-            className="hover:underline font-medium text-[#888] hover:text-[#D4AF37]"
+            className="hover:underline font-medium text-[#888] hover:text-[#BF092F]"
           >
             📁 Carpeta Raíz Tributario
           </button>
@@ -248,7 +248,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                   onNavigateFolder(f);
                 }}
                 className={`hover:underline ${
-                  idx === folderHistory.length - 1 ? 'font-bold text-[#D4AF37]' : 'text-[#888] hover:text-white'
+                  idx === folderHistory.length - 1 ? 'font-bold text-[#BF092F]' : 'text-[#888] hover:text-white'
                 }`}
               >
                 {f.name}
@@ -263,7 +263,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
       {subfolders.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#666] flex items-center space-x-1.5">
-            <Folder className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <Folder className="w-3.5 h-3.5 text-[#BF092F]" />
             <span>Subcarpetas ({subfolders.length}):</span>
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -271,13 +271,13 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
               <div
                 key={folder.id}
                 onClick={() => onNavigateFolder(folder)}
-                className="bg-[#111114] p-3.5 rounded-xl border border-[#222226] hover:border-[#D4AF37]/60 hover:shadow-lg cursor-pointer transition-all flex items-center space-x-3 group"
+                className="bg-[#111114] p-3.5 rounded-xl border border-[#222226] hover:border-[#BF092F]/60 hover:shadow-lg cursor-pointer transition-all flex items-center space-x-3 group"
               >
-                <div className="w-9 h-9 rounded-lg bg-[#1A1A1E] text-[#D4AF37] border border-[#222226] flex items-center justify-center group-hover:bg-[#D4AF37] group-hover:text-[#0A0A0C] transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#1A1A1E] text-[#BF092F] border border-[#222226] flex items-center justify-center group-hover:bg-[#BF092F] group-hover:text-[#0A0A0C] transition-colors">
                   <Folder className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-semibold text-[#CCC] truncate group-hover:text-[#D4AF37]">
+                  <div className="text-xs font-semibold text-[#CCC] truncate group-hover:text-[#BF092F]">
                     {folder.name}
                   </div>
                   <div className="text-[10px] text-[#555]">Abrir subcarpeta</div>
@@ -292,7 +292,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-[#666] flex items-center space-x-1.5">
-            <FileText className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <FileText className="w-3.5 h-3.5 text-[#BF092F]" />
             <span>Libros y Documentos Tributarios ({driveItems.length}):</span>
           </h2>
 
@@ -300,7 +300,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
             <button
               onClick={() => setViewMode('grid')}
               className={`px-2.5 py-1 rounded text-xs transition-colors ${
-                viewMode === 'grid' ? 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]/50 font-bold' : 'text-[#666] hover:text-[#CCC]'
+                viewMode === 'grid' ? 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]/50 font-bold' : 'text-[#666] hover:text-[#CCC]'
               }`}
             >
               Cuadrícula
@@ -308,7 +308,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
             <button
               onClick={() => setViewMode('list')}
               className={`px-2.5 py-1 rounded text-xs transition-colors ${
-                viewMode === 'list' ? 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]/50 font-bold' : 'text-[#666] hover:text-[#CCC]'
+                viewMode === 'list' ? 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]/50 font-bold' : 'text-[#666] hover:text-[#CCC]'
               }`}
             >
               Lista
@@ -318,7 +318,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
 
         {isLoading ? (
           <div className="bg-[#111114] rounded-xl border border-[#222226] p-12 text-center text-[#888] space-y-3">
-            <RefreshCw className="w-8 h-8 mx-auto animate-spin text-[#D4AF37]" />
+            <RefreshCw className="w-8 h-8 mx-auto animate-spin text-[#BF092F]" />
             <p className="text-sm font-medium">Cargando libros y documentos de Google Drive...</p>
           </div>
         ) : driveItems.length === 0 ? (
@@ -338,7 +338,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
               return (
                 <div
                   key={file.id}
-                  className="bg-[#111114] rounded-xl border border-[#222226] hover:border-[#D4AF37]/60 hover:shadow-xl transition-all p-4 flex flex-col justify-between space-y-3"
+                  className="bg-[#111114] rounded-xl border border-[#222226] hover:border-[#BF092F]/60 hover:shadow-xl transition-all p-4 flex flex-col justify-between space-y-3"
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between">
@@ -349,7 +349,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                           <FileText className="w-4 h-4 text-blue-400" />
                         )}
                       </div>
-                      <span className="text-[10px] font-medium bg-[#1A1A1E] text-[#D4AF37] px-2 py-0.5 rounded border border-[#222226] font-mono">
+                      <span className="text-[10px] font-medium bg-[#1A1A1E] text-[#BF092F] px-2 py-0.5 rounded border border-[#222226] font-mono">
                         {entry.category}
                       </span>
                     </div>
@@ -357,7 +357,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                     <div>
                       <h3
                         onClick={() => onOpenFileInReader(entry)}
-                        className="text-sm font-serif font-bold text-white hover:text-[#D4AF37] cursor-pointer line-clamp-2"
+                        className="text-sm font-serif font-bold text-white hover:text-[#BF092F] cursor-pointer line-clamp-2"
                         title={file.name}
                       >
                         {file.name}
@@ -380,7 +380,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                     <div className="flex items-center space-x-1.5">
                       <button
                         onClick={() => onOpenFileInReader(entry)}
-                        className="px-2.5 py-1 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] text-[11px] font-bold uppercase tracking-wider transition-colors flex items-center space-x-1"
+                        className="px-2.5 py-1 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] text-[11px] font-bold uppercase tracking-wider transition-colors flex items-center space-x-1"
                       >
                         <BookOpen className="w-3 h-3" />
                         <span>Leer</span>
@@ -424,7 +424,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                         <div className="text-[11px] text-[#888]">{entry.author}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="px-2 py-0.5 rounded text-[11px] bg-[#1A1A1E] text-[#D4AF37] border border-[#222226] font-mono font-medium">
+                        <span className="px-2 py-0.5 rounded text-[11px] bg-[#1A1A1E] text-[#BF092F] border border-[#222226] font-mono font-medium">
                           {entry.category}
                         </span>
                       </td>
@@ -434,7 +434,7 @@ export const DriveExplorer: React.FC<DriveExplorerProps> = ({
                       <td className="px-4 py-3 text-right space-x-2">
                         <button
                           onClick={() => onOpenFileInReader(entry)}
-                          className="px-2.5 py-1 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider"
+                          className="px-2.5 py-1 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider"
                         >
                           Abrir Lector
                         </button>

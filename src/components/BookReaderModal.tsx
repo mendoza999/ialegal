@@ -58,7 +58,7 @@ export function BookReaderModal({ book, onClose }: BookReaderModalProps) {
               <div className="flex items-center space-x-3 text-xs text-[#888] mt-1">
                 <span>{book.author}</span>
                 <span>•</span>
-                <span className="text-[#D4AF37] font-medium">{book.category}</span>
+                <span className="text-[#BF092F] font-medium">{book.category}</span>
               </div>
             </div>
             
@@ -71,7 +71,7 @@ export function BookReaderModal({ book, onClose }: BookReaderModalProps) {
                   }
                 }}
                 className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                  isSidebarOpen ? 'bg-[#D4AF37] text-[#0A0A0C]' : 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#222226]'
+                  isSidebarOpen ? 'bg-[#BF092F] text-[#0A0A0C]' : 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]/30 hover:bg-[#222226]'
                 }`}
               >
                 <Sparkles className="w-4 h-4" />
@@ -111,14 +111,14 @@ export function BookReaderModal({ book, onClose }: BookReaderModalProps) {
         {isSidebarOpen && (
           <div className="w-96 border-l border-[#222226] bg-[#111114] flex flex-col overflow-y-auto animate-in slide-in-from-right-8">
             <div className="p-4 border-b border-[#222226] flex items-center space-x-2 sticky top-0 bg-[#111114] z-10">
-              <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+              <Sparkles className="w-5 h-5 text-[#BF092F]" />
               <h3 className="font-serif font-bold text-white">Ficha Doctrinal IA</h3>
             </div>
 
             <div className="p-4 space-y-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12 text-[#888] space-y-3">
-                  <RefreshCw className="w-8 h-8 animate-spin text-[#D4AF37]" />
+                  <RefreshCw className="w-8 h-8 animate-spin text-[#BF092F]" />
                   <span className="text-sm">Analizando documento...</span>
                 </div>
               ) : error ? (
@@ -129,7 +129,7 @@ export function BookReaderModal({ book, onClose }: BookReaderModalProps) {
               ) : ficha ? (
                 <div className="space-y-6">
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] mb-2">Ratio Doctrinal</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#BF092F] mb-2">Ratio Doctrinal</h4>
                     <p className="text-sm text-white bg-[#1A1A1E] p-3 rounded-lg border border-[#333]">
                       {ficha.ratioDoctrinal}
                     </p>
@@ -170,7 +170,7 @@ export function BookReaderModal({ book, onClose }: BookReaderModalProps) {
                   )}
                   
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] mb-2">Citación Sugerida</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#BF092F] mb-2">Citación Sugerida</h4>
                     <div className="bg-[#1A1A1E] p-3 rounded-lg border border-[#333] font-mono text-xs text-[#888] break-words">
                       {ficha.citacionAPA}
                     </div>
@@ -180,7 +180,7 @@ export function BookReaderModal({ book, onClose }: BookReaderModalProps) {
                 <div className="text-center py-10">
                   <button
                     onClick={handleAnalyze}
-                    className="px-4 py-2 bg-[#D4AF37] text-[#0A0A0C] font-bold rounded-lg hover:bg-[#c5a030] transition-colors"
+                    className="px-4 py-2 bg-[#BF092F] text-[#0A0A0C] font-bold rounded-lg hover:bg-[#A10727] transition-colors"
                   >
                     Generar Ficha
                   </button>

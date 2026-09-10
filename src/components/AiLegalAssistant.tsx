@@ -58,7 +58,7 @@ export const AiLegalAssistant: React.FC<AiLegalAssistantProps> = ({ books }) => 
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] p-4 rounded-full shadow-2xl shadow-[#D4AF37]/20 transition-transform hover:scale-105 z-50 flex items-center justify-center"
+        className="fixed bottom-6 right-6 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] p-4 rounded-full shadow-2xl shadow-[#BF092F]/20 transition-transform hover:scale-105 z-50 flex items-center justify-center"
         title="Consultar al Asistente Tributario IA"
       >
         <MessageSquare className="w-6 h-6" />
@@ -72,12 +72,12 @@ export const AiLegalAssistant: React.FC<AiLegalAssistantProps> = ({ books }) => 
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-[#222226] bg-[#1A1A1E] rounded-t-2xl">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded bg-[#D4AF37] flex items-center justify-center">
+          <div className="w-8 h-8 rounded bg-[#BF092F] flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-[#0A0A0C]" />
           </div>
           <div>
             <h3 className="text-sm font-serif font-bold text-white">Asistente Tributario</h3>
-            <p className="text-[10px] text-[#D4AF37]">Impulsado por IA Gemini</p>
+            <p className="text-[10px] text-[#BF092F]">Impulsado por IA Gemini</p>
           </div>
         </div>
         <button
@@ -106,7 +106,7 @@ export const AiLegalAssistant: React.FC<AiLegalAssistantProps> = ({ books }) => 
         {response && (
           <div className="bg-[#1A1A1E] rounded-2xl rounded-tl-none p-4 border border-[#222226] text-sm text-[#D1D1D1] shadow-md max-w-[95%]">
             <div className="flex items-center space-x-2 mb-2 pb-2 border-b border-[#333]">
-              <Scale className="w-4 h-4 text-[#D4AF37]" />
+              <Scale className="w-4 h-4 text-[#BF092F]" />
               <span className="font-bold text-xs text-white">Dictamen Generado</span>
             </div>
             <div className="prose prose-invert prose-sm max-w-none markdown-body">
@@ -117,7 +117,7 @@ export const AiLegalAssistant: React.FC<AiLegalAssistantProps> = ({ books }) => 
 
         {isLoading && (
           <div className="flex items-center space-x-2 text-[#888] text-xs px-2 py-1">
-            <RefreshCw className="w-3 h-3 animate-spin text-[#D4AF37]" />
+            <RefreshCw className="w-3 h-3 animate-spin text-[#BF092F]" />
             <span>Analizando bibliografía y generando respuesta...</span>
           </div>
         )}
@@ -137,12 +137,12 @@ export const AiLegalAssistant: React.FC<AiLegalAssistantProps> = ({ books }) => 
             }}
             placeholder="Escribe tu consulta tributaria..."
             rows={2}
-            className="w-full bg-[#1A1A1E] border border-[#333] rounded-xl py-3 pl-3 pr-12 text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#D4AF37] resize-none"
+            className="w-full bg-[#1A1A1E] border border-[#333] rounded-xl py-3 pl-3 pr-12 text-sm text-white placeholder-[#666] focus:outline-none focus:border-[#BF092F] resize-none"
           />
           <button
             onClick={handleAsk}
             disabled={isLoading || !query.trim()}
-            className="absolute right-2 bottom-2 p-2 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] rounded-lg disabled:opacity-50 transition-colors"
+            className="absolute right-2 bottom-2 p-2 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] rounded-lg disabled:opacity-50 transition-colors"
           >
             <Send className="w-4 h-4" />
           </button>

@@ -227,7 +227,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Header with Title & Close */}
         <div className="p-5 sm:p-6 border-b border-[#222226] flex items-center justify-between bg-[#16161A]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A1A1E] border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] shadow">
+            <div className="w-10 h-10 rounded-xl bg-[#1A1A1E] border border-[#BF092F]/50 flex items-center justify-center text-[#BF092F] shadow">
               {view === 'changePassword' || view === 'forgotPassword' ? (
                 <KeyRound className="w-5 h-5" />
               ) : view === 'register' ? (
@@ -268,7 +268,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               onClick={() => handleSwitchView('login')}
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 view === 'login'
-                  ? 'bg-[#1A1A1E] text-[#D4AF37] shadow border border-[#222226]'
+                  ? 'bg-[#1A1A1E] text-[#BF092F] shadow border border-[#222226]'
                   : 'text-[#888] hover:text-[#CCC]'
               }`}
             >
@@ -278,7 +278,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               onClick={() => handleSwitchView('register')}
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 view === 'register'
-                  ? 'bg-[#1A1A1E] text-[#D4AF37] shadow border border-[#222226]'
+                  ? 'bg-[#1A1A1E] text-[#BF092F] shadow border border-[#222226]'
                   : 'text-[#888] hover:text-[#CCC]'
               }`}
             >
@@ -313,7 +313,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="bg-[#16161A] p-3 rounded-xl border border-[#222226] space-y-2">
                 <div className="text-[11px] font-semibold text-[#888] flex items-center justify-between">
                   <span className="flex items-center space-x-1">
-                    <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#BF092F]" />
                     <span>Cuentas de prueba rápida:</span>
                   </span>
                   <span className="text-[10px] text-[#666]">1-Click</span>
@@ -323,9 +323,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="button"
                     onClick={() => handleQuickLogin('admin@lextributaria.pe', 'Admin123*')}
                     disabled={isLoading}
-                    className="p-2 rounded-lg bg-[#1A1A1E] border border-[#D4AF37]/40 hover:border-[#D4AF37] text-left transition-all group"
+                    className="p-2 rounded-lg bg-[#1A1A1E] border border-[#BF092F]/40 hover:border-[#BF092F] text-left transition-all group"
                   >
-                    <div className="font-bold text-[#D4AF37] text-[11px] flex items-center space-x-1">
+                    <div className="font-bold text-[#BF092F] text-[11px] flex items-center space-x-1">
                       <ShieldCheck className="w-3 h-3" />
                       <span>Administrador</span>
                     </div>
@@ -362,7 +362,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ejemplo@abogados.pe"
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                 </div>
               </div>
@@ -376,7 +376,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleSwitchView('forgotPassword')}
-                    className="text-[11px] text-[#D4AF37] hover:underline"
+                    className="text-[11px] text-[#BF092F] hover:underline"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -391,7 +391,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -406,7 +406,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
+                className="w-full py-2.5 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
               >
                 <span>{isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -417,7 +417,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSwitchView('register')}
-                  className="text-[#D4AF37] font-semibold hover:underline"
+                  className="text-[#BF092F] font-semibold hover:underline"
                 >
                   Regístrate aquí
                 </button>
@@ -444,7 +444,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ej. Dr. Mario Ruiz de Castilla"
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                 </div>
               </div>
@@ -464,7 +464,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tributarista@estudio.pe"
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                 </div>
               </div>
@@ -499,11 +499,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     onClick={() => setRole('admin')}
                     className={`p-3 rounded-xl border cursor-pointer transition-all ${
                       role === 'admin'
-                        ? 'bg-[#1A1A1E] border-[#D4AF37] text-white shadow'
+                        ? 'bg-[#1A1A1E] border-[#BF092F] text-white shadow'
                         : 'bg-[#16161A] border-[#222226] text-[#888] hover:border-[#444]'
                     }`}
                   >
-                    <div className="flex items-center space-x-1.5 font-bold text-xs text-[#D4AF37]">
+                    <div className="flex items-center space-x-1.5 font-bold text-xs text-[#BF092F]">
                       <ShieldCheck className="w-3.5 h-3.5" />
                       <span>Administrador</span>
                     </div>
@@ -530,7 +530,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -557,7 +557,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -572,7 +572,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
+                className="w-full py-2.5 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
               >
                 <span>{isLoading ? 'Creando cuenta...' : `Crear Cuenta como ${role.toUpperCase()}`}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -583,7 +583,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSwitchView('login')}
-                  className="text-[#D4AF37] font-semibold hover:underline"
+                  className="text-[#BF092F] font-semibold hover:underline"
                 >
                   Inicia sesión aquí
                 </button>
@@ -614,7 +614,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -641,7 +641,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -668,7 +668,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -691,7 +691,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-2/3 py-2.5 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50"
+                  className="w-2/3 py-2.5 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50"
                 >
                   <span>{isLoading ? 'Actualizando...' : 'Guardar Nueva Clave'}</span>
                 </button>
@@ -722,7 +722,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ejemplo@abogados.pe"
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                 </div>
               </div>
@@ -742,7 +742,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -769,7 +769,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#D4AF37] transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#16161A] border border-[#222226] rounded-xl text-white text-xs placeholder-[#555] focus:outline-none focus:border-[#BF092F] transition-colors"
                   />
                   <button
                     type="button"
@@ -784,7 +784,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
+                className="w-full py-2.5 bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow flex items-center justify-center space-x-2 disabled:opacity-50 mt-2"
               >
                 <span>{isLoading ? 'Restableciendo...' : 'Restablecer Contraseña'}</span>
               </button>

@@ -169,7 +169,7 @@ export const AdminPanel: React.FC = () => {
       .replace(/\.[^/.]+$/, '')
       .replace(/[-_]/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase());
-    
+
     if (!uploadTitle) {
       setUploadTitle(cleanTitle);
     }
@@ -362,11 +362,11 @@ export const AdminPanel: React.FC = () => {
       const res = await fetch(import.meta.env.BASE_URL + 'api/users/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: newUserName, 
-          email: newUserEmail, 
+        body: JSON.stringify({
+          name: newUserName,
+          email: newUserEmail,
           password: newUserPassword,
-          role: newUserRole 
+          role: newUserRole
         })
       });
       const data = await res.json();
@@ -392,7 +392,7 @@ export const AdminPanel: React.FC = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-slate-900 text-white shadow-xl">
         <div className="flex items-center space-x-3.5">
@@ -432,11 +432,10 @@ export const AdminPanel: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === tab.id
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === tab.id
                   ? 'bg-amber-600 text-white shadow-xs'
                   : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
-              }`}
+                }`}
             >
               <Icon className="h-4 w-4" />
               <span>{tab.label}</span>
@@ -500,7 +499,7 @@ export const AdminPanel: React.FC = () => {
                 </h3>
               </div>
               <a
-                href="http://161.97.181.77:7474"
+                href="http://161.97.181.77:7475"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-1 text-xs text-amber-600 dark:text-amber-400 hover:underline"
@@ -684,11 +683,10 @@ export const AdminPanel: React.FC = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`p-6 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center space-y-2 ${
-                  isDragging
+                className={`p-6 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center space-y-2 ${isDragging
                     ? 'border-amber-500 bg-amber-500/10 scale-[1.01]'
                     : 'border-slate-300 dark:border-slate-700 hover:border-amber-500/50 bg-slate-50 dark:bg-slate-800/40'
-                }`}
+                  }`}
               >
                 <input
                   type="file"
@@ -922,11 +920,10 @@ export const AdminPanel: React.FC = () => {
                     </span>
                   </div>
 
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                    u.role === 'admin'
+                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${u.role === 'admin'
                       ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                  }`}>
+                    }`}>
                     {u.role}
                   </span>
 

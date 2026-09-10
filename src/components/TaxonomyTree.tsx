@@ -59,7 +59,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
       {/* Title */}
       <div className="space-y-1">
         <h1 className="text-2xl font-serif font-bold text-white flex items-center space-x-2">
-          <FolderTree className="w-6 h-6 text-[#D4AF37]" />
+          <FolderTree className="w-6 h-6 text-[#BF092F]" />
           <span>Tesauro & Estructura Dogmática del Derecho Tributario</span>
         </h1>
         <p className="text-sm text-[#888]">
@@ -90,7 +90,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
                     onClick={() => setSelectedNode(rootNode)}
                     className={`flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors text-xs font-semibold ${
                       isSelected
-                        ? 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]/50 shadow'
+                        ? 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]/50 shadow'
                         : 'text-[#CCC] hover:bg-[#16161A]'
                     }`}
                   >
@@ -100,7 +100,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
                         className="p-0.5 rounded hover:bg-white/10 transition-colors"
                       >
                         {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-[#D4AF37]" />
+                          <ChevronDown className="w-4 h-4 text-[#BF092F]" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-[#666]" />
                         )}
@@ -109,7 +109,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
                     </div>
 
                     <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${
-                      isSelected ? 'bg-[#D4AF37] text-[#0A0A0C] font-bold' : 'bg-[#16161A] text-[#888] border border-[#222226]'
+                      isSelected ? 'bg-[#BF092F] text-[#0A0A0C] font-bold' : 'bg-[#16161A] text-[#888] border border-[#222226]'
                     }`}>
                       {entriesCount}
                     </span>
@@ -128,7 +128,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
                             onClick={() => setSelectedNode(child)}
                             className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors text-xs ${
                               isChildSelected
-                                ? 'bg-[#1A1A1E] text-[#D4AF37] font-bold border border-[#D4AF37]/40'
+                                ? 'bg-[#1A1A1E] text-[#BF092F] font-bold border border-[#BF092F]/40'
                                 : 'text-[#888] hover:text-[#CCC] hover:bg-[#16161A]'
                             }`}
                           >
@@ -157,7 +157,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
           {/* Header of Selected Node */}
           <div className="space-y-2 border-b border-[#222226] pb-4">
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-semibold bg-[#1A1A1E] text-[#D4AF37] border border-[#222226]">
+              <span className="px-2.5 py-0.5 rounded text-xs font-mono font-semibold bg-[#1A1A1E] text-[#BF092F] border border-[#222226]">
                 {selectedNode.category}
               </span>
               {selectedNode.articles && selectedNode.articles.map((art) => (
@@ -180,7 +180,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
             <div className="pt-2">
               <button
                 onClick={() => onSelectTopic(selectedNode.label, selectedNode.category, selectedNode.articles?.[0])}
-                className="inline-flex items-center space-x-2 px-4 py-2 rounded bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider transition-colors shadow"
+                className="inline-flex items-center space-x-2 px-4 py-2 rounded bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider transition-colors shadow"
               >
                 <span>Ver todos los resultados en el Buscador</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
                   <div
                     key={child.id}
                     onClick={() => setSelectedNode(child)}
-                    className="p-3 rounded-lg border border-[#222226] bg-[#16161A] hover:border-[#D4AF37]/50 hover:bg-[#1A1A1E] cursor-pointer transition-colors space-y-1"
+                    className="p-3 rounded-lg border border-[#222226] bg-[#16161A] hover:border-[#BF092F]/50 hover:bg-[#1A1A1E] cursor-pointer transition-colors space-y-1"
                   >
                     <div className="text-xs font-semibold text-[#CCC]">{child.label}</div>
                     <div className="text-[11px] text-[#666] line-clamp-2">{child.description}</div>
@@ -235,7 +235,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
                           {entry.author} ({entry.year})
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono bg-[#0E0E11] text-[#D4AF37] px-2 py-0.5 rounded border border-[#222226]">
+                      <span className="text-[10px] font-mono bg-[#0E0E11] text-[#BF092F] px-2 py-0.5 rounded border border-[#222226]">
                         {entry.isDriveSource ? 'Google Drive' : 'Doctrina'}
                       </span>
                     </div>

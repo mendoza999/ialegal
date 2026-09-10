@@ -76,15 +76,15 @@ export const Header: React.FC<HeaderProps> = ({
           
           {/* Logo & Title */}
           <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setActiveTab('repertorio')}>
-            <div className="w-10 h-10 rounded-lg bg-[#16161A] border border-[#D4AF37]/60 flex items-center justify-center shadow-inner group-hover:border-[#D4AF37] transition-colors">
-              <Scale className="w-5 h-5 text-[#D4AF37] stroke-[2.2]" />
+            <div className="w-10 h-10 rounded-lg bg-[#16161A] border border-[#BF092F]/60 flex items-center justify-center shadow-inner group-hover:border-[#BF092F] transition-colors">
+              <Scale className="w-5 h-5 text-[#BF092F] stroke-[2.2]" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-serif font-bold text-lg tracking-tight text-white group-hover:text-[#D4AF37] transition-colors">
+                <span className="font-serif font-bold text-lg tracking-tight text-white group-hover:text-[#BF092F] transition-colors">
                   LexTributaria
                 </span>
-                <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-[#1A1A1E] text-[#D4AF37] font-semibold border border-[#222226] tracking-wider">
+                <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-[#1A1A1E] text-[#BF092F] font-semibold border border-[#222226] tracking-wider">
                   Doctrina Jurídica
                 </span>
               </div>
@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
             {isAdmin && (
               <button
                 onClick={onOpenAddDoctrinal}
-                className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-semibold transition-colors shadow-sm"
+                className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]/40 text-xs font-semibold transition-colors shadow-sm"
                 title="Agregar obra doctrinal al repositorio general"
               >
                 <BookPlus className="w-3.5 h-3.5" />
@@ -117,11 +117,11 @@ export const Header: React.FC<HeaderProps> = ({
                   driveConnected && tributarioFolderFound
                     ? 'bg-[#1A1A1E] border-emerald-700/60 text-emerald-400'
                     : driveConnected
-                    ? 'bg-[#1A1A1E] border-[#D4AF37]/50 text-[#D4AF37]'
-                    : 'bg-[#16161A] border-[#222226] text-[#888] hover:text-[#BBB] hover:border-[#D4AF37]/50'
+                    ? 'bg-[#1A1A1E] border-[#BF092F]/50 text-[#BF092F]'
+                    : 'bg-[#16161A] border-[#222226] text-[#888] hover:text-[#BBB] hover:border-[#BF092F]/50'
                 }`}
               >
-                <HardDrive className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <HardDrive className="w-3.5 h-3.5 text-[#BF092F]" />
                 <span>
                   {driveConnected
                     ? tributarioFolderFound
@@ -146,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center font-serif text-xs font-bold ${
                     isAdmin 
-                      ? 'bg-[#1A1A1E] border border-[#D4AF37] text-[#D4AF37]' 
+                      ? 'bg-[#1A1A1E] border border-[#BF092F] text-[#BF092F]' 
                       : 'bg-[#1A1A1E] border border-sky-500 text-sky-400'
                   }`}>
                     {currentUser.name.charAt(0).toUpperCase()}
@@ -158,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                     <div className="flex items-center space-x-1">
                       <span className={`text-[9px] uppercase font-bold tracking-wider ${
-                        isAdmin ? 'text-[#D4AF37]' : 'text-sky-400'
+                        isAdmin ? 'text-[#BF092F]' : 'text-sky-400'
                       }`}>
                         {currentUser.role}
                       </span>
@@ -178,7 +178,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <span className="font-bold text-white text-sm">{currentUser.name}</span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                           isAdmin 
-                            ? 'bg-[#1A1A1E] text-[#D4AF37] border border-[#D4AF37]' 
+                            ? 'bg-[#1A1A1E] text-[#BF092F] border border-[#BF092F]' 
                             : 'bg-[#16161A] text-sky-400 border border-sky-600/40'
                         }`}>
                           {currentUser.role}
@@ -198,7 +198,7 @@ export const Header: React.FC<HeaderProps> = ({
                         }}
                         className="w-full px-4 py-2.5 flex items-center space-x-2.5 text-[#CCC] hover:text-white hover:bg-[#16161A] transition-colors text-left"
                       >
-                        <KeyRound className="w-4 h-4 text-[#D4AF37]" />
+                        <KeyRound className="w-4 h-4 text-[#BF092F]" />
                         <span>Cambiar Contraseña</span>
                       </button>
 
@@ -209,9 +209,9 @@ export const Header: React.FC<HeaderProps> = ({
                             setProfileDropdownOpen(false);
                             onOpenAdminUsers();
                           }}
-                          className="w-full px-4 py-2.5 flex items-center space-x-2.5 text-[#D4AF37] hover:bg-[#16161A] transition-colors text-left font-semibold"
+                          className="w-full px-4 py-2.5 flex items-center space-x-2.5 text-[#BF092F] hover:bg-[#16161A] transition-colors text-left font-semibold"
                         >
-                          <Users className="w-4 h-4 text-[#D4AF37]" />
+                          <Users className="w-4 h-4 text-[#BF092F]" />
                           <span>Gestión de Usuarios & Roles</span>
                         </button>
                       )}
@@ -240,7 +240,7 @@ export const Header: React.FC<HeaderProps> = ({
                           disabled={isConnectingDrive}
                           className="w-full px-4 py-2.5 flex items-center space-x-2.5 text-[#CCC] hover:text-white hover:bg-[#16161A] transition-colors text-left"
                         >
-                          <HardDrive className="w-4 h-4 text-[#D4AF37]" />
+                          <HardDrive className="w-4 h-4 text-[#BF092F]" />
                           <span>{isConnectingDrive ? 'Conectando...' : 'Vincular Google Drive'}</span>
                         </button>
                       )}
@@ -268,13 +268,13 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => onOpenAuthModal('login')}
-                  className="px-3.5 py-1.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] border border-[#222226] hover:border-[#D4AF37]/50 text-white text-xs font-semibold transition-all"
+                  className="px-3.5 py-1.5 rounded bg-[#16161A] hover:bg-[#1A1A1E] border border-[#222226] hover:border-[#BF092F]/50 text-white text-xs font-semibold transition-all"
                 >
                   Iniciar Sesión
                 </button>
                 <button
                   onClick={() => onOpenAuthModal('register')}
-                  className="inline-flex items-center justify-center bg-[#D4AF37] hover:bg-[#c5a030] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded shadow transition-all"
+                  className="inline-flex items-center justify-center bg-[#BF092F] hover:bg-[#A10727] text-[#0A0A0C] text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded shadow transition-all"
                 >
                   <span>Registrarse</span>
                 </button>
@@ -294,7 +294,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('repertorio')}
             className={`flex items-center space-x-2 px-3 py-1.5 rounded text-xs font-medium transition-all whitespace-nowrap ${
               activeTab === 'repertorio'
-                ? 'bg-[#1A1A1E] text-[#D4AF37] border-b-2 border-[#D4AF37] font-semibold'
+                ? 'bg-[#1A1A1E] text-[#BF092F] border-b-2 border-[#BF092F] font-semibold'
                 : 'text-[#888] hover:text-[#BBB] hover:bg-[#16161A]'
             }`}
           >
@@ -306,7 +306,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('drive')}
             className={`flex items-center space-x-2 px-3 py-1.5 rounded text-xs font-medium transition-all whitespace-nowrap ${
               activeTab === 'drive'
-                ? 'bg-[#1A1A1E] text-[#D4AF37] border-b-2 border-[#D4AF37] font-semibold'
+                ? 'bg-[#1A1A1E] text-[#BF092F] border-b-2 border-[#BF092F] font-semibold'
                 : 'text-[#888] hover:text-[#BBB] hover:bg-[#16161A]'
             }`}
           >
@@ -321,7 +321,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('tesauro')}
             className={`flex items-center space-x-2 px-3 py-1.5 rounded text-xs font-medium transition-all whitespace-nowrap ${
               activeTab === 'tesauro'
-                ? 'bg-[#1A1A1E] text-[#D4AF37] border-b-2 border-[#D4AF37] font-semibold'
+                ? 'bg-[#1A1A1E] text-[#BF092F] border-b-2 border-[#BF092F] font-semibold'
                 : 'text-[#888] hover:text-[#BBB] hover:bg-[#16161A]'
             }`}
           >
@@ -333,11 +333,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('asistente')}
             className={`flex items-center space-x-2 px-3 py-1.5 rounded text-xs font-medium transition-all whitespace-nowrap ${
               activeTab === 'asistente'
-                ? 'bg-[#1A1A1E] text-[#D4AF37] border-b-2 border-[#D4AF37] font-semibold'
+                ? 'bg-[#1A1A1E] text-[#BF092F] border-b-2 border-[#BF092F] font-semibold'
                 : 'text-[#888] hover:text-[#BBB] hover:bg-[#16161A]'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#BF092F]" />
             <span>Asistente Jurídico IA</span>
           </button>
 
@@ -345,7 +345,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('comparador')}
             className={`flex items-center space-x-2 px-3 py-1.5 rounded text-xs font-medium transition-all whitespace-nowrap ${
               activeTab === 'comparador'
-                ? 'bg-[#1A1A1E] text-[#D4AF37] border-b-2 border-[#D4AF37] font-semibold'
+                ? 'bg-[#1A1A1E] text-[#BF092F] border-b-2 border-[#BF092F] font-semibold'
                 : 'text-[#888] hover:text-[#BBB] hover:bg-[#16161A]'
             }`}
           >
@@ -357,14 +357,14 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('guardados')}
             className={`flex items-center space-x-2 px-3 py-1.5 rounded text-xs font-medium transition-all whitespace-nowrap ml-auto ${
               activeTab === 'guardados'
-                ? 'bg-[#1A1A1E] text-[#D4AF37] border-b-2 border-[#D4AF37] font-semibold'
+                ? 'bg-[#1A1A1E] text-[#BF092F] border-b-2 border-[#BF092F] font-semibold'
                 : 'text-[#888] hover:text-[#BBB] hover:bg-[#16161A]'
             }`}
           >
             <Bookmark className="w-3.5 h-3.5" />
             <span>Mis Citas</span>
             {savedCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.2 bg-[#D4AF37] text-[#0A0A0C] rounded-full text-[10px] font-bold">
+              <span className="ml-1 px-1.5 py-0.2 bg-[#BF092F] text-[#0A0A0C] rounded-full text-[10px] font-bold">
                 {savedCount}
               </span>
             )}

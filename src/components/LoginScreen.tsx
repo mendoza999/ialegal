@@ -70,10 +70,10 @@ export const LoginScreen: React.FC = () => {
           </div>
           <div className="text-center">
             <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              IA<span className="text-amber-600 dark:text-amber-500">Tributario</span>
+              IA<span className="text-amber-600 dark:text-amber-500">Legal</span>
             </h1>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">
-              Motor de busqueda sobre Conocimiento Tributario
+              Motor de busqueda sobre Conocimiento Legal peruano
             </p>
           </div>
         </div>
