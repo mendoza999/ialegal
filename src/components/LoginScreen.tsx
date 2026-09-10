@@ -1,33 +1,98 @@
 import React, { useState } from 'react';
-import { Shield, Mail, Lock, ArrowRight, Activity, Database, Sun, Moon } from 'lucide-react';
+import { Shield, Mail, Lock, User, ArrowRight, Activity, Database, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useTheme } from '../context/ThemeContext';
+
+type Mode = 'login' | 'register';
+
+const inputClass =
+  'w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all';
 
 export const LoginScreen: React.FC = () => {
   const { login } = useAuth();
   const { addNotification } = useNotifications();
   const { isDarkMode, toggleDarkMode } = useTheme();
 
+  const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirm, setRegConfirm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const switchMode = (m: Mode) => {
+    setMode(m);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
 
     setIsLoading(true);
     try {
-      console.log('Begin Login');
       const success = await login(email, password);
-      console.log('Login success: ', success);
       if (!success) {
         addNotification({
           title: 'Error de Acceso',
           message: 'Correo o contraseña incorrectos',
           type: 'warning'
         });
+      }
+    } catch (err) {
+      addNotification({
+        title: 'Error del Sistema',
+        message: 'No se pudo conectar con el servidor',
+        type: 'warning'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = regName.trim();
+    const mail = regEmail.trim().toLowerCase();
+
+    if (!name) {
+      addNotification({ title: 'Registro incompleto', message: 'Ingresa tu nombre completo.', type: 'warning' });
+      return;
+    }
+    if (!mail || !mail.includes('@')) {
+      addNotification({ title: 'Registro incompleto', message: 'Ingresa un correo electrónico válido.', type: 'warning' });
+      return;
+    }
+    if (!regPassword || regPassword.length < 6) {
+      addNotification({ title: 'Registro incompleto', message: 'La contraseña debe tener al menos 6 caracteres.', type: 'warning' });
+      return;
+    }
+    if (regPassword !== regConfirm) {
+      addNotification({ title: 'Registro incompleto', message: 'Las contraseñas no coinciden.', type: 'warning' });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}api/users/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email: mail, password: regPassword, role: 'user' })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        addNotification({
+          title: 'No se pudo registrar',
+          message: data.error || 'Error al crear la cuenta.',
+          type: 'warning'
+        });
+        return;
+      }
+      const ok = await login(mail, regPassword);
+      if (ok) {
+        addNotification({ title: 'Cuenta creada', message: `Bienvenido, ${name}.`, type: 'success' });
       }
     } catch (err) {
       addNotification({
@@ -78,58 +143,182 @@ export const LoginScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Login Box */}
+        {/* Login / Register Box */}
         <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  Correo Electrónico
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-slate-400" />
-                  </div>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="usuario@ejemplo.com"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-4 w-4 text-slate-400" />
-                  </div>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
+          {/* Mode toggle */}
+          <div className="grid grid-cols-2 gap-1 p-1 mb-6 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
             <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white rounded-xl text-sm font-bold shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2"
+              type="button"
+              onClick={() => switchMode('login')}
+              className={`py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                mode === 'login'
+                  ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-500 shadow'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
             >
-              <span>{isLoading ? 'Verificando...' : 'Acceder al Sistema'}</span>
-              {!isLoading && <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />}
+              Acceder
             </button>
-          </form>
+            <button
+              type="button"
+              onClick={() => switchMode('register')}
+              className={`py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                mode === 'register'
+                  ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-500 shadow'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              Regístrate
+            </button>
+          </div>
+
+          {mode === 'login' ? (
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Correo Electrónico
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="usuario@ejemplo.com"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white rounded-xl text-sm font-bold shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2"
+              >
+                <span>{isLoading ? 'Verificando...' : 'Acceder al Sistema'}</span>
+                {!isLoading && <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Nombre Completo
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={regName}
+                      onChange={(e) => setRegName(e.target.value)}
+                      placeholder="Nombres y apellidos"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Correo Electrónico
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      placeholder="usuario@ejemplo.com"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      value={regPassword}
+                      onChange={(e) => setRegPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Repetir Contraseña
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-slate-400" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      value={regConfirm}
+                      onChange={(e) => setRegConfirm(e.target.value)}
+                      placeholder="Repite tu contraseña"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rol</span>
+                  <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-950 text-amber-600 dark:text-amber-500 font-bold border border-slate-200 dark:border-slate-800 tracking-wider">
+                    Usuario
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white rounded-xl text-sm font-bold shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2"
+              >
+                <span>{isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}</span>
+                {!isLoading && <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />}
+              </button>
+            </form>
+          )}
           <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">
             <div className="flex items-center justify-center space-x-6">
               <div className="flex flex-col items-center space-y-1 opacity-60">
