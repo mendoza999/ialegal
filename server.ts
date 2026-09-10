@@ -49,7 +49,7 @@ setInterval(() => {
 
 async function startServer() {
   const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
+  const PORT = Number(process.env.PORT) || 3005;
   const isProd = process.env.NODE_ENV === 'production';
 
   // Hostinger / proxy reverso (Nginx/Cloudflare): confiar en X-Forwarded-*
