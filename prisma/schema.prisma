@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  avatar String?
+  role String @default("user")
+  authProvider String @default("email")
+  organization String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLogin String?
+  queryCount Int @default(0)
+  dailyWebCount Int @default(0)
+  dailyWebDate String?
+  activeSessionToken String?
+  activeSessionAt DateTime?
+  sessions ChatSession[]
+  accessLogs AccessLog[]
+  notifications Notification[]
+  @@map("users")
+}
+
+model AccessLog {
+  id String @id @default(uuid())
+  userId String?
+  userName String?
+  userEmail String
+  userRole String?
+  ipAddress String?
+  userAgent String?
+  device String?
+  action String @default("LOGIN")
+  details String?
+  createdAt DateTime @default(now())
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([createdAt])
+  @@map("access_logs")
+}
+
+model Notification {
+  id String @id @default(uuid())
+  userId String?
+  title String
+  message String
+  type String @default("info")
+  read Boolean @default(false)
+  createdAt DateTime @default(now())
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model RamaDerecho {
+  id String @id @default(uuid())
+  nombre String
+  sessions ChatSession[]
+  documents TaxDocument[]
+  @@map("ramasDelDerecho")
+}
+
+model ChatSession {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String
+  ramaId String?
+  rama RamaDerecho? @relation(fields: [ramaId], references: [id], onDelete: SetNull)
+  categoryFilter String?
+  docFilter Json? @default("[]")
+  tags Json? @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages ChatMessage[]
+  @@index([ramaId])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id String @id @default(uuid())
+  sessionId String
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role String
+  content String @db.Text
+  executiveSummary String? @db.Text
+  citations Json? @default("[]")
+  graphNodes Json? @default("[]")
+  graphLinks Json? @default("[]")
+  searchGroundingSources Json? @default("[]")
+  isWebGrounded Boolean @default(false)
+  ragTypeUsed String?
+  confidenceScore Float?
+  timestamp String?
+  createdAt DateTime @default(now())
+  @@map("chat_messages")
+}
+
+model TaxDocument {
+  id String @id
+  title String
+  author String
+  year Int
+  ramaId String?
+  rama RamaDerecho? @relation(fields: [ramaId], references: [id], onDelete: SetNull)
+  category String
+  categoryLabel String
+  totalPages Int @default(0)
+  fileSize String @default("1 MB")
+  driveUrl String?
+  fileUrl String?
+  fileName String?
+  chunksCount Int @default(0)
+  entitiesCount Int @default(0)
+  status String @default("indexed")
+  uploadDate String
+  description String @db.Text
+  tags Json? @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chunks DocumentChunk[]
+  @@index([ramaId])
+  @@map("tax_documents")
+}
+
+model DocumentChunk {
+  id String @id
+  docId String
+  document TaxDocument @relation(fields: [docId], references: [id], onDelete: Cascade)
+  docTitle String
+  author String
+  page Int
+  chapter String
+  section String
+  text String @db.Text
+  entities Json? @default("[]")
+  articlesReferenced Json? @default("[]")
+  relevanceScore Float?
+  createdAt DateTime @default(now())
+  @@map("document_chunks")
+}
+
+model LegalNorm {
+  id String @id @default(uuid())
+  titulo String
+  tipo String
+  fechaPublicacion String
+  fechaCreacion DateTime @default(now())
+  fuente String
+  rutaArchivo String
+  contenidoCompleto String @db.Text
+  status String
+  organismoEmisor String?
+  tituloCorta String?
+  artCheck DateTime?
+  articulos Articulo[]
+  derogaciones Derogacion[]
+  modificaciones Modificacion[]
+  temas Tema[]
+}
+
+model Articulo {
+  id String @id @default(uuid())
+  numero String
+  titulo String
+  contenido String @db.Text
+  numeroOrden Int
+  articulosRelacionados String[]
+  norma LegalNorm @relation(fields: [normaId], references: [id], onDelete: Cascade)
+  normaId String
+  @@index([normaId])
+}
+
+model Tema {
+  id String @id @default(uuid())
+  nombre String
+  codigo String?
+  nivel Int
+  normas LegalNorm[]
+}
+
+model Organismo {
+  id String @id @default(uuid())
+  nombre String
+  sigla String?
+}
+
+model Derogacion {
+  id String @id @default(uuid())
+  fecha DateTime
+  tipo String
+  organismo String?
+  normaId String
+  norma LegalNorm @relation(fields: [normaId], references: [id], onDelete: Cascade)
+  creadoEn DateTime @default(now())
+}
+
+model Modificacion {
+  id String @id @default(uuid())
+  fecha DateTime
+  tipo String
+  organismo String?
+  normaId String
+  articuloAfectado String
+  nuevoTexto String @db.Text
+  norma LegalNorm @relation(fields: [normaId], references: [id], onDelete: Cascade)
+  creadoEn DateTime @default(now())
+}
+
+model Subrogacion {
+  id String @id @default(uuid())
+  fecha DateTime
+  normaId String
+  normaOriginalId String
+  articuloOriginal String?
+  nuevoArticulo String?
+  creadoEn DateTime @default(now())
+}

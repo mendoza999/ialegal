@@ -1,0 +1,6 @@
+{
+  "name": "LexTributario AI - RAG & GraphRAG",
+  "description": "Sistema inteligente de consulta y análisis de libros de Derecho Tributario con RAG Híbrido, GraphRAG sobre Neo4j, Grounding Web, citas bibliográficas y exportación ejecutiva a PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
