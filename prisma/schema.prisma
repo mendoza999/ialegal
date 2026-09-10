@@ -22,6 +22,8 @@ model User {
   queryCount Int @default(0)
   dailyWebCount Int @default(0)
   dailyWebDate String?
+  dailyLocalCount Int @default(0)
+  dailyLocalDate String?
   activeSessionToken String?
   activeSessionAt DateTime?
   sessions ChatSession[]

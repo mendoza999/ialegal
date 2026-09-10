@@ -214,23 +214,23 @@ async function startServer() {
         }
       }
 
-      // Check daily 10 web queries limit if Web Grounding is requested
+      // Check daily 5 web queries limit if Web Grounding is requested
       if (enableWebGrounding) {
         const usage = await usersStore.getWebQueryUsage(userId);
         if (usage.remaining <= 0) {
-          const limitAnswer = `### ⚠️ Límite Diario de Búsqueda Web Alcanzado (10/10)
+          const limitAnswer = `### ⚠️ Límite Diario de Búsqueda Web Alcanzado (5/5)
 
-Has alcanzado el límite máximo de **10 consultas de Búsqueda Web por día**.
+Has alcanzado el límite máximo de **5 consultas de Búsqueda Web por día**.
 
 Para continuar realizando consultas hoy:
-- Puedes desactivar el botón **"Búsqueda Web"** y realizar consultas ilimitadas sobre la **Base de Conocimiento y Libros Especializados** (RAG Local y Grafo Neo4j).
+- Puedes desactivar el botón **"Búsqueda Web"** y realizar hasta **5 consultas diarias** sobre la **Base de Conocimiento y Libros Especializados** (RAG Local y Grafo Neo4j).
 - El cupo de búsquedas web se reiniciará automáticamente a las 00:00 hrs de mañana.`;
 
           if (activeSessionId) {
             await chatStore.saveMessage(activeSessionId, {
               role: 'assistant',
               content: limitAnswer,
-              executiveSummary: 'Límite diario de 10 consultas de búsqueda web alcanzado.',
+              executiveSummary: 'Límite diario de 5 consultas de búsqueda web alcanzado.',
               isWebGrounded: false,
               ragTypeUsed: 'hybrid',
               confidenceScore: 0
@@ -239,7 +239,7 @@ Para continuar realizando consultas hoy:
 
           return res.json({
             answer: limitAnswer,
-            executiveSummary: 'Límite diario de 10 consultas de búsqueda web alcanzado.',
+            executiveSummary: 'Límite diario de 5 consultas de búsqueda web alcanzado.',
             citations: [],
             graphNodes: [],
             graphLinks: [],
@@ -248,6 +248,42 @@ Para continuar realizando consultas hoy:
             ragTypeUsed: 'hybrid',
             confidenceScore: 0,
             webUsage: usage
+          });
+        }
+      }
+
+      // Check daily 5 local queries limit for non-web (RAG local) queries
+      if (!enableWebGrounding) {
+        const localUsage = await usersStore.getLocalQueryUsage(userId);
+        if (localUsage.remaining <= 0) {
+          const limitAnswer = `### ⚠️ Límite Diario de Búsqueda Local Alcanzado (5/5)
+
+Has alcanzado el límite máximo de **5 consultas locales por día**.
+
+El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de mañana.`;
+
+          if (activeSessionId) {
+            await chatStore.saveMessage(activeSessionId, {
+              role: 'assistant',
+              content: limitAnswer,
+              executiveSummary: 'Límite diario de 5 consultas locales alcanzado.',
+              isWebGrounded: false,
+              ragTypeUsed: 'hybrid',
+              confidenceScore: 0
+            });
+          }
+
+          return res.json({
+            answer: limitAnswer,
+            executiveSummary: 'Límite diario de 5 consultas locales alcanzado.',
+            citations: [],
+            graphNodes: [],
+            graphLinks: [],
+            searchGroundingSources: [],
+            isWebGrounded: false,
+            ragTypeUsed: 'hybrid',
+            confidenceScore: 0,
+            localUsage
           });
         }
       }
@@ -264,9 +300,11 @@ Para continuar realizando consultas hoy:
         enableWebGrounding: enableWebGrounding ?? false
       });
 
-      // Increment web usage if web grounding was executed
+      // Increment web usage if web grounding was executed, else local usage
       if (enableWebGrounding && result.isWebGrounded) {
         await usersStore.incrementWebQueryUsage(userId);
+      } else if (!enableWebGrounding) {
+        await usersStore.incrementLocalQueryUsage(userId);
       }
 
       // Save assistant response message to PostgreSQL
@@ -305,12 +343,14 @@ Para continuar realizando consultas hoy:
         }
       }
 
-      const currentUsage = userId ? await usersStore.getWebQueryUsage(userId) : { count: 0, limit: 10, remaining: 10 };
+      const currentUsage = userId ? await usersStore.getWebQueryUsage(userId) : { count: 0, limit: 5, remaining: 5 };
+      const currentLocalUsage = userId ? await usersStore.getLocalQueryUsage(userId) : { count: 0, limit: 5, remaining: 5 };
 
       res.json({
         ...result,
         savedMessage: savedAssistantMsg,
-        webUsage: currentUsage
+        webUsage: currentUsage,
+        localUsage: currentLocalUsage
       });
     } catch (e: any) {
       console.error('Error processing RAG query in server:', e);
@@ -322,6 +362,16 @@ Para continuar realizando consultas hoy:
   app.get('/api/users/web-usage/:userId?', async (req, res) => {
     try {
       const usage = await usersStore.getWebQueryUsage(req.params.userId);
+      res.json(usage);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Check user daily local query usage
+  app.get('/api/users/local-usage/:userId?', async (req, res) => {
+    try {
+      const usage = await usersStore.getLocalQueryUsage(req.params.userId);
       res.json(usage);
     } catch (e: any) {
       res.status(500).json({ error: e.message });

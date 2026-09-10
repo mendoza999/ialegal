@@ -3,6 +3,10 @@ import crypto from 'crypto';
 import { prisma } from './db';
 import { UserProfile, UserRole, AccessLogEntry } from '../src/types';
 
+// Cupos diarios por tipo de consulta (req. 5 local + 5 web)
+export const DAILY_WEB_LIMIT = 5;
+export const DAILY_LOCAL_LIMIT = 5;
+
 export function parseDeviceAndBrowser(userAgent?: string): { device: string; browser: string; os: string } {
   if (!userAgent) return { device: 'Desconocido', browser: 'Navegador Web', os: 'SO Desconocido' };
 
@@ -164,6 +168,8 @@ export class UsersStore {
         queryCount: 0,
         dailyWebCount: 0,
         dailyWebDate: today,
+        dailyLocalCount: 0,
+        dailyLocalDate: today,
       },
     });
 
@@ -489,7 +495,7 @@ export class UsersStore {
 
   public async getWebQueryUsage(userId?: string): Promise<{ count: number; limit: number; remaining: number; resetDate: string }> {
     const today = new Date().toISOString().split('T')[0];
-    const limit = 10;
+    const limit = DAILY_WEB_LIMIT;
 
     if (!userId) {
       return { count: 0, limit, remaining: limit, resetDate: today };
@@ -526,7 +532,7 @@ export class UsersStore {
 
   public async incrementWebQueryUsage(userId?: string): Promise<boolean> {
     const today = new Date().toISOString().split('T')[0];
-    const limit = 10;
+    const limit = DAILY_WEB_LIMIT;
 
     if (!userId) return true;
 
@@ -558,6 +564,80 @@ export class UsersStore {
       return true;
     } catch (err) {
       console.error(`[UsersStore] Error incrementing web usage for ${userId}:`, err);
+      return true;
+    }
+  }
+
+  public async getLocalQueryUsage(userId?: string): Promise<{ count: number; limit: number; remaining: number; resetDate: string }> {
+    const today = new Date().toISOString().split('T')[0];
+    const limit = DAILY_LOCAL_LIMIT;
+
+    if (!userId) {
+      return { count: 0, limit, remaining: limit, resetDate: today };
+    }
+
+    try {
+      const u = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!u) {
+        return { count: 0, limit, remaining: limit, resetDate: today };
+      }
+
+      if (u.dailyLocalDate !== today) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { dailyLocalDate: today, dailyLocalCount: 0 },
+        });
+        return { count: 0, limit, remaining: limit, resetDate: today };
+      }
+
+      return {
+        count: u.dailyLocalCount,
+        limit,
+        remaining: Math.max(0, limit - u.dailyLocalCount),
+        resetDate: today,
+      };
+    } catch (err) {
+      console.error(`[UsersStore] Error checking local usage for ${userId}:`, err);
+      return { count: 0, limit, remaining: limit, resetDate: today };
+    }
+  }
+
+  public async incrementLocalQueryUsage(userId?: string): Promise<boolean> {
+    const today = new Date().toISOString().split('T')[0];
+    const limit = DAILY_LOCAL_LIMIT;
+
+    if (!userId) return true;
+
+    try {
+      const u = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!u) return true;
+
+      let currentCount = u.dailyLocalCount;
+      if (u.dailyLocalDate !== today) {
+        currentCount = 0;
+      }
+
+      if (currentCount >= limit) {
+        return false;
+      }
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          dailyLocalDate: today,
+          dailyLocalCount: currentCount + 1,
+        },
+      });
+
+      return true;
+    } catch (err) {
+      console.error(`[UsersStore] Error incrementing local usage for ${userId}:`, err);
       return true;
     }
   }

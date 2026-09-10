@@ -105,8 +105,13 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [webUsage, setWebUsage] = useState<{ count: number; limit: number; remaining: number }>({
     count: 0,
-    limit: 10,
-    remaining: 10
+    limit: 5,
+    remaining: 5
+  });
+  const [localUsage, setLocalUsage] = useState<{ count: number; limit: number; remaining: number }>({
+    count: 0,
+    limit: 5,
+    remaining: 5
   });
 
   const [knowledgeStats, setKnowledgeStats] = useState<{ documentsCount: number; chunksCount: number; nodesCount: number }>({
@@ -117,7 +122,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Fetch daily web usage & knowledge base stats
+  // Fetch daily web & local usage & knowledge base stats
   useEffect(() => {
     if (user?.id) {
       fetch(`${import.meta.env.BASE_URL}api/users/web-usage/${user.id}`)
@@ -125,6 +130,14 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
         .then(data => {
           if (data && typeof data.remaining === 'number') {
             setWebUsage(data);
+          }
+        })
+        .catch(err => console.error(err));
+      fetch(`${import.meta.env.BASE_URL}api/users/local-usage/${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && typeof data.remaining === 'number') {
+            setLocalUsage(data);
           }
         })
         .catch(err => console.error(err));
@@ -276,6 +289,16 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
     const query = textToSend || inputQuery.trim();
     if (!query || isLoading) return;
 
+    // Local daily quota guard (web quota is enforced when grounding is on)
+    if (!enableWebGrounding && localUsage.remaining <= 0) {
+      addNotification({
+        title: 'Límite Diario Alcanzado',
+        message: 'Has utilizado las 5 consultas locales disponibles para hoy. Podrás realizar más mañana.',
+        type: 'warning'
+      });
+      return;
+    }
+
     setInputQuery('');
 
     const userMessage: ChatMessage = {
@@ -352,6 +375,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
         if (data.webUsage.remaining <= 0) {
           setEnableWebGrounding(false);
         }
+      }
+
+      if (data.localUsage) {
+        setLocalUsage(data.localUsage);
       }
 
       const assistantMessage: ChatMessage = data.savedMessage || {
@@ -530,26 +557,32 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
               <option value="constitucional">Constitucional</option>
             </select>
 
-            {/* Neo4j GraphRAG Toggle */}
+            {/* Neo4j GraphRAG Toggle with Daily 5 Local Limit */}
             <button
               onClick={() => setEnableGraphRAG(!enableGraphRAG)}
               className={`flex items-center space-x-1 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-colors ${enableGraphRAG
                 ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                 }`}
-              title="Activar análisis de relaciones en Grafo Neo4j"
+              title={`Búsqueda Local en base de conocimiento (${localUsage.remaining}/${localUsage.limit} consultas hoy)`}
             >
               <Share2 className="h-3 w-3" />
               <span>Búsqueda Local</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono font-bold ${localUsage.remaining > 0
+                ? (enableGraphRAG ? 'bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300')
+                : 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300'
+                }`}>
+                {localUsage.remaining}/{localUsage.limit}
+              </span>
             </button>
 
-            {/* Web Grounding Toggle with Daily 10 Limit */}
+            {/* Web Grounding Toggle with Daily 5 Limit */}
             <button
               onClick={() => {
                 if (!enableWebGrounding && webUsage.remaining <= 0) {
                   addNotification({
                     title: 'Límite Diario Alcanzado',
-                    message: 'Has utilizado las 10 consultas web disponibles para hoy. Podrás realizar más mañana o consultar la base local sin límites.',
+                    message: 'Has utilizado las 5 consultas web disponibles para hoy. Podrás realizar más mañana o consultar la base local (5 diarias).',
                     type: 'warning'
                   });
                   return;
@@ -807,8 +840,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
           </form>
 
           <div className="flex items-center justify-between mt-2 px-1 text-[10px] text-slate-400">
-            <span>IA-Tributario • Citas con libro, autor y página verificada</span>
-            <span>Local Server: https://servicios.algoritmojuridico.com/tributario</span>
+            <span>IA-Legal • Citas con libro, autor y página verificada</span>
+            <span>Local Server: https://servicios.algoritmojuridico.com/ialegal/</span>
           </div>
         </div>
 

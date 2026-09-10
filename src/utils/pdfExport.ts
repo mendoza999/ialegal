@@ -90,11 +90,11 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
   const confidenceScore = params.confidenceScore || 96;
   const date = sanitizeTextForPDF(
     params.date ||
-      new Date().toLocaleDateString('es-PE', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+    new Date().toLocaleDateString('es-PE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
   );
 
   const doc = new jsPDF({
@@ -140,7 +140,7 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
   // ==========================================
   // PAGE 1: HEADER BANNER (Executive Style)
   // ==========================================
-  
+
   // Top Gold accent stripe
   doc.setFillColor(...COLORS.goldPrimary);
   doc.rect(0, 0, pageWidth, 4, 'F');
@@ -153,12 +153,12 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
   doc.setTextColor(...COLORS.white);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
-  doc.text('LEXTRIBUTARIO AI', margin, 16);
+  doc.text('IA - LEGAL', margin, 16);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(203, 213, 225);
-  doc.text('SISTEMA INTEGRAL DE INTELIGENCIA JURÍDICO-TRIBUTARIA Y DOCTRINA', margin, 21);
+  doc.text('SISTEMA INTEGRAL DE INTELIGENCIA JURÍDICO-LEGAL Y DOCTRINA', margin, 21);
 
   doc.setFontSize(7);
   doc.setTextColor(148, 163, 184);
