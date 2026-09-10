@@ -118,10 +118,16 @@ async function startServer() {
     next();
   };
 
-  // Compat: front antiguo bajo /tributario/ llama a /tributario/api/*; el API vive en /api/*
-  // Se mantiene para no romper despliegues previos. En ialegal.* (base '/') no afecta.
+  // Compat subrutas: el front con base '/tributario/' o '/ialegal/' llama a
+  // '<prefijo>/api/*'; el API vive en /api/*. Nginx (proxy_pass con '/' final)
+  // ya despoja el prefijo, esto cubre acceso directo sin proxy.
   app.use((req, _res, next) => {
-    if (req.url.startsWith('/tributario/api/')) req.url = req.url.slice('/tributario'.length);
+    for (const prefix of ['/tributario', '/ialegal']) {
+      if (req.url.startsWith(`${prefix}/api/`)) {
+        req.url = req.url.slice(prefix.length);
+        break;
+      }
+    }
     next();
   });
 
