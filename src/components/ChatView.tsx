@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Bot,
   User,
+  Eye,
   Scale,
   ShieldCheck,
   Layers,
@@ -114,6 +115,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
     limit: 5,
     remaining: 5
   });
+  const [visitTotal, setVisitTotal] = useState<number>(0);
 
   const [knowledgeStats, setKnowledgeStats] = useState<{ documentsCount: number; chunksCount: number; nodesCount: number }>({
     documentsCount: 5,
@@ -145,6 +147,12 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
     }
 
     const ramaParam = selectedRama?.id ? `?ramaId=${selectedRama.id}` : '';
+    fetch(`${import.meta.env.BASE_URL}api/visits/stats`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && typeof data.total === 'number') setVisitTotal(data.total);
+      })
+      .catch(err => console.error(err));
     fetch(`${import.meta.env.BASE_URL}api/knowledge/stats${ramaParam}`)
       .then(res => res.json())
       .then(data => {
@@ -843,6 +851,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
 
           <div className="flex items-center justify-between mt-2 px-1 text-[10px] text-slate-400">
             <span>IA-Legal • Citas con libro, autor y página verificada</span>
+            <span className="inline-flex items-center gap-1 font-semibold text-slate-500 dark:text-slate-400">
+              <Eye className="h-3 w-3" />
+              {visitTotal > 0 ? `${visitTotal.toLocaleString('es-PE')} visitas` : '…'}
+            </span>
             <span>Local Server: https://servicios.algoritmojuridico.com/ialegal/</span>
           </div>
         </div>
