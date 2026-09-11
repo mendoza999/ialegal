@@ -21,7 +21,8 @@ import {
   ArrowRight,
   BookOpen,
   Sparkles,
-  Check
+  Check,
+  MessageSquareText
 } from 'lucide-react';
 import { Neo4jConnectionConfig, TaxDocument, UserProfile } from '../types';
 import { useNotifications } from '../context/NotificationContext';
@@ -33,7 +34,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 export const AdminPanel: React.FC = () => {
   const { addNotification } = useNotifications();
 
-  const [activeTab, setActiveTab] = useState<'neo4j' | 'upload' | 'users' | 'metrics'>('upload');
+  const [activeTab, setActiveTab] = useState<'neo4j' | 'upload' | 'users' | 'metrics' | 'feedback'>('upload');
 
   // Neo4j State
   const [neo4jConfig, setNeo4jConfig] = useState<Neo4jConnectionConfig>({
@@ -79,6 +80,10 @@ export const AdminPanel: React.FC = () => {
   const [newUserRole, setNewUserRole] = useState<'admin' | 'user'>('user');
   const [isCreatingUser, setIsCreatingUser] = useState(false);
 
+  // Feedback State
+  const [feedbackList, setFeedbackList] = useState<any[]>([]);
+  const [fbFilter, setFbFilter] = useState<'todos' | 'sugerencia' | 'contacto'>('todos');
+
   useEffect(() => {
     // Check Neo4j connection
     fetch(import.meta.env.BASE_URL + 'api/neo4j/status')
@@ -93,6 +98,14 @@ export const AdminPanel: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (data.users) setUsers(data.users);
+      })
+      .catch(err => console.error(err));
+
+    // Fetch feedback (sugerencias y contacto)
+    fetch(import.meta.env.BASE_URL + 'api/feedback?limit=150')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.feedback)) setFeedbackList(data.feedback);
       })
       .catch(err => console.error(err));
   }, []);
@@ -425,7 +438,8 @@ export const AdminPanel: React.FC = () => {
           { id: 'neo4j', label: 'Neo4j & Consola Cypher', icon: Database },
           { id: 'upload', label: 'Ingesta de Libros & PDFs', icon: Upload },
           { id: 'users', label: 'Gestión de Usuarios y Roles', icon: Users },
-          { id: 'metrics', label: 'Métricas RAG & Auditoría', icon: Activity }
+          { id: 'metrics', label: 'Métricas RAG & Auditoría', icon: Activity },
+          { id: 'feedback', label: 'Sugerencias y Contacto', icon: MessageSquareText }
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -966,6 +980,60 @@ export const AdminPanel: React.FC = () => {
             <p className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">100%</p>
             <p className="text-[11px] text-slate-500 mt-1">Exportable a PDF con sellos normativos</p>
           </div>
+        </div>
+      )}
+
+      {/* Tab 5: Sugerencias y Contacto */}
+      {activeTab === 'feedback' && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {(['todos', 'sugerencia', 'contacto'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFbFilter(f)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${fbFilter === f
+                  ? 'bg-amber-600 text-white shadow'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+              >
+                {f === 'todos' ? `Todos (${feedbackList.length})` : f === 'sugerencia'
+                  ? `Sugerencias (${feedbackList.filter(x => x.type === 'sugerencia').length})`
+                  : `Contacto (${feedbackList.filter(x => x.type === 'contacto').length})`}
+              </button>
+            ))}
+          </div>
+
+          {feedbackList.filter(x => fbFilter === 'todos' || x.type === fbFilter).length === 0 ? (
+            <div className="p-10 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <MessageSquareText className="h-8 w-8 mx-auto text-slate-300 dark:text-slate-600" />
+              <p className="text-sm text-slate-500 mt-3">Aún no hay mensajes de usuarios.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {feedbackList
+                .filter(x => fbFilter === 'todos' || x.type === fbFilter)
+                .map(fb => (
+                  <div key={fb.id} className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${fb.type === 'contacto'
+                        ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                        : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+                        }`}>
+                        {fb.type === 'contacto' ? 'Contacto' : 'Sugerencia'}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {fb.createdAt ? new Date(fb.createdAt).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                    </div>
+                    {fb.subject && <p className="text-sm font-bold text-slate-900 dark:text-white">{fb.subject}</p>}
+                    <p className="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{fb.message}</p>
+                    <p className="text-[10px] text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      {fb.userName || fb.userEmail ? `${fb.userName || ''}${fb.userName && fb.userEmail ? ' • ' : ''}${fb.userEmail || ''}` : 'Usuario no identificado'}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
 
