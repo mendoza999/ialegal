@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Sparkles, X } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -16,6 +17,7 @@ function MainAppContent() {
   const [currentTab, setCurrentTab] = useState<'chat' | 'graph' | 'library' | 'admin'>('chat');
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null);
   const [selectedDocForChat, setSelectedDocForChat] = useState<TaxDocument | null>(null);
+  const [showPromo, setShowPromo] = useState(true);
 
   const handleSelectDocForChat = (doc: TaxDocument) => {
     setSelectedDocForChat(doc);
@@ -30,6 +32,21 @@ function MainAppContent() {
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
       />
+
+      {/* Promo banner */}
+      {showPromo && (
+        <div className="relative bg-gradient-to-r from-[#A10727] via-[#BF092F] to-[#A10727] text-white px-4 py-2 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-widest shadow">
+          <Sparkles className="h-4 w-4 shrink-0" />
+          <span>Gratis por tiempo limitado</span>
+          <button
+            onClick={() => setShowPromo(false)}
+            aria-label="Cerrar aviso"
+            className="absolute right-3 p-1 rounded hover:bg-white/20 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* Main Tab Views */}
       <main className="flex-1 flex flex-col min-h-0">
