@@ -243,3 +243,10 @@ model Feedback {
   @@index([createdAt])
   @@map("feedback")
 }
+
+// Contador de visitas: una fila por día
+model VisitCounter {
+  date String @id
+  count Int @default(0)
+  @@map("visit_counters")
+}

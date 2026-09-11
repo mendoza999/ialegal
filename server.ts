@@ -962,6 +962,33 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
     }
   });
 
+  // 7.2 Contador de visitas persistente (una fila por día)
+  app.post('/api/visits/hit', async (req, res) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const row = await prisma.visitCounter.upsert({
+        where: { date: today },
+        create: { date: today, count: 1 },
+        update: { count: { increment: 1 } },
+      });
+      const agg = await prisma.visitCounter.aggregate({ _sum: { count: true } });
+      res.json({ success: true, today: row.count, total: agg._sum.count || 0, date: today });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/visits/stats', async (req, res) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const row = await prisma.visitCounter.findUnique({ where: { date: today } });
+      const agg = await prisma.visitCounter.aggregate({ _sum: { count: true } });
+      res.json({ success: true, today: row?.count || 0, total: agg._sum.count || 0, date: today });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.post('/api/users/change-password', async (req, res) => {
     try {
       const { userId, newPassword } = req.body;

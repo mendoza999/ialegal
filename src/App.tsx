@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, X } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -26,7 +26,7 @@ function MainAppContent() {
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased transition-colors duration-200">
-      
+
       {/* Top Navigation */}
       <Navbar
         currentTab={currentTab}
@@ -37,7 +37,7 @@ function MainAppContent() {
       {showPromo && (
         <div className="relative bg-gradient-to-r from-[#A10727] via-[#BF092F] to-[#A10727] text-white px-4 py-2 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-widest shadow">
           <Sparkles className="h-4 w-4 shrink-0" />
-          <span>Gratis por tiempo limitado</span>
+          <span> **** VERSION BETA ::: GRATUITO POR TIEMPO LIMITADO ***** </span>
           <button
             onClick={() => setShowPromo(false)}
             aria-label="Cerrar aviso"
@@ -87,6 +87,14 @@ function MainAppContent() {
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
+
+  // Contador de visitas: 1 hit por pestaña (sessionStorage), persistente en PG
+  useEffect(() => {
+    if (sessionStorage.getItem('ialegal_visit_hit')) return;
+    sessionStorage.setItem('ialegal_visit_hit', '1');
+    fetch(`${import.meta.env.BASE_URL}api/visits/hit`, { method: 'POST' }).catch(() => {});
+  }, []);
+
   return isAuthenticated ? <MainAppContent /> : <LoginScreen />;
 }
 
