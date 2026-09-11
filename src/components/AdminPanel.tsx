@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Neo4jConnectionConfig, TaxDocument, UserProfile } from '../types';
 import { useNotifications } from '../context/NotificationContext';
+import { adminResetPassword } from '../services/authService';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -83,6 +84,11 @@ export const AdminPanel: React.FC = () => {
   // Feedback State
   const [feedbackList, setFeedbackList] = useState<any[]>([]);
   const [fbFilter, setFbFilter] = useState<'todos' | 'sugerencia' | 'contacto'>('todos');
+
+  // Reset password state (per-row inline form)
+  const [resetPwUserId, setResetPwUserId] = useState<string | null>(null);
+  const [resetPwValue, setResetPwValue] = useState('');
+  const [isResettingPw, setIsResettingPw] = useState(false);
 
   useEffect(() => {
     // Check Neo4j connection
@@ -364,6 +370,25 @@ export const AdminPanel: React.FC = () => {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent, userId: string, userName: string) => {
+    e.preventDefault();
+    if (!resetPwValue || resetPwValue.length < 6) {
+      addNotification({ title: 'Contraseña inválida', message: 'Debe tener al menos 6 caracteres.', type: 'warning' });
+      return;
+    }
+    setIsResettingPw(true);
+    try {
+      await adminResetPassword(userId, resetPwValue);
+      setResetPwUserId(null);
+      setResetPwValue('');
+      addNotification({ title: 'Contraseña actualizada', message: `Nueva clave guardada para ${userName}.`, type: 'success' });
+    } catch (err: any) {
+      addNotification({ title: 'Error al actualizar', message: err?.message || 'No se pudo cambiar la contraseña.', type: 'warning' });
+    } finally {
+      setIsResettingPw(false);
     }
   };
 
@@ -917,7 +942,8 @@ export const AdminPanel: React.FC = () => {
 
           <div className="divide-y divide-slate-100 dark:divide-slate-800 overflow-x-auto">
             {users.map(u => (
-              <div key={u.id} className="py-3.5 flex items-center justify-between min-w-[500px]">
+              <div key={u.id}>
+                <div className="py-3.5 flex items-center justify-between min-w-[500px]">
                 <div className="flex items-center space-x-3">
                   <img src={u.avatar} alt={u.name} className="h-10 w-10 rounded-xl object-cover" />
                   <div>
@@ -947,7 +973,37 @@ export const AdminPanel: React.FC = () => {
                   >
                     Cambiar a {u.role === 'admin' ? 'Usuario' : 'Admin'}
                   </button>
+
+                  <button
+                    onClick={() => {
+                      setResetPwUserId(resetPwUserId === u.id ? null : u.id);
+                      setResetPwValue('');
+                    }}
+                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-950 text-slate-700 dark:text-slate-300 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                  >
+                    Clave
+                  </button>
                 </div>
+                </div>
+                {resetPwUserId === u.id && (
+                  <form onSubmit={e => handleResetPassword(e, u.id, u.name)} className="flex items-center gap-2 py-2 ml-[52px] animate-in slide-in-from-top-1">
+                    <input
+                      type="text"
+                      value={resetPwValue}
+                      onChange={e => setResetPwValue(e.target.value)}
+                      placeholder="Nueva contraseña (mín. 6)"
+                      autoFocus
+                      className="w-56 p-2 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isResettingPw}
+                      className="px-3 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-60"
+                    >
+                      {isResettingPw ? 'Guardando...' : 'Guardar'}
+                    </button>
+                  </form>
+                )}
               </div>
             ))}
           </div>
