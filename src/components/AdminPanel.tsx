@@ -85,6 +85,9 @@ export const AdminPanel: React.FC = () => {
   const [feedbackList, setFeedbackList] = useState<any[]>([]);
   const [fbFilter, setFbFilter] = useState<'todos' | 'sugerencia' | 'contacto'>('todos');
 
+  // Visits State
+  const [visitStats, setVisitStats] = useState<{ today: number; total: number }>({ today: 0, total: 0 });
+
   // Reset password state (per-row inline form)
   const [resetPwUserId, setResetPwUserId] = useState<string | null>(null);
   const [resetPwValue, setResetPwValue] = useState('');
@@ -112,6 +115,14 @@ export const AdminPanel: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.feedback)) setFeedbackList(data.feedback);
+      })
+      .catch(err => console.error(err));
+
+    // Fetch visit stats
+    fetch(import.meta.env.BASE_URL + 'api/visits/stats')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setVisitStats({ today: data.today || 0, total: data.total || 0 });
       })
       .catch(err => console.error(err));
   }, []);
@@ -1013,6 +1024,17 @@ export const AdminPanel: React.FC = () => {
       {/* Tab 4: Metrics & Audit */}
       {activeTab === 'metrics' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <span className="text-[10px] font-bold uppercase text-slate-400">Visitas Hoy</span>
+            <p className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{visitStats.today}</p>
+            <p className="text-[11px] text-slate-500 mt-1">Cargas de página del día</p>
+          </div>
+
+          <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <span className="text-[10px] font-bold uppercase text-slate-400">Visitas Totales</span>
+            <p className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">{visitStats.total}</p>
+            <p className="text-[11px] text-slate-500 mt-1">Acumulado histórico</p>
+          </div>
           <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
             <span className="text-[10px] font-bold uppercase text-slate-400">Precisión Semántica RAG</span>
             <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">98.4%</p>
