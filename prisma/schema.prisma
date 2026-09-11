@@ -228,3 +228,18 @@ model Subrogacion {
   nuevoArticulo String?
   creadoEn DateTime @default(now())
 }
+
+model Feedback {
+  id String @id @default(uuid())
+  userId String?
+  userEmail String?
+  userName String?
+  type String @default("sugerencia")
+  subject String?
+  message String @db.Text
+  read Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@index([type])
+  @@index([createdAt])
+  @@map("feedback")
+}

@@ -28,6 +28,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useRama } from '../context/RamaContext';
 import { exportExecutiveSummaryPDF } from '../utils/pdfExport';
+import { FeedbackWidget } from './FeedbackWidget';
 
 interface ChatViewProps {
   onOpenCitation: (citation: Citation) => void;
@@ -465,6 +466,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
 
   return (
     <div className="w-full max-w-7xl mx-auto h-[calc(100vh-5rem)] flex flex-col md:flex-row gap-4 p-3 sm:p-6 overflow-hidden">
+      <FeedbackWidget />
 
       {/* Left Sidebar: Chat History */}
       <div className="w-full md:w-72 lg:w-80 flex flex-col rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 space-y-4 shrink-0 hidden sm:flex">

@@ -913,6 +913,55 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
     }
   });
 
+  // 7.1 Comentarios/Sugerencias y Contacto (persistente en PostgreSQL: feedback)
+  app.post('/api/feedback', async (req, res) => {
+    try {
+      const { userId, type, subject, message } = req.body;
+      if (!message || typeof message !== 'string' || !message.trim()) {
+        return res.status(400).json({ error: 'El mensaje es obligatorio.' });
+      }
+      if (message.length > 2000) {
+        return res.status(400).json({ error: 'El mensaje no puede superar los 2000 caracteres.' });
+      }
+      const kind = type === 'contacto' ? 'contacto' : 'sugerencia';
+      let userEmail: string | undefined;
+      let userName: string | undefined;
+      if (userId) {
+        try {
+          const u = await prisma.user.findUnique({ where: { id: userId } });
+          userEmail = u?.email || undefined;
+          userName = u?.name || undefined;
+        } catch { /* ignore */ }
+      }
+      const fb = await prisma.feedback.create({
+        data: {
+          userId: userId || undefined,
+          userEmail,
+          userName,
+          type: kind,
+          subject: (subject || '').slice(0, 200) || undefined,
+          message: message.trim(),
+        },
+      });
+      res.json({ success: true, feedback: fb });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get('/api/feedback', requireAdminAuth, async (req, res) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 150;
+      const items = await prisma.feedback.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: Math.min(Math.max(limit, 1), 500),
+      });
+      res.json({ success: true, feedback: items });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.post('/api/users/change-password', async (req, res) => {
     try {
       const { userId, newPassword } = req.body;

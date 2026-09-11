@@ -111,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="hidden sm:block">
               <div className="flex items-center space-x-1.5">
                 <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">
-                  IA-Legal
+                  IALegal
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[160px]">
@@ -144,7 +144,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-3.5 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
                   <span>Ramas del Derecho</span>
-                  <span className="text-[10px] font-normal text-amber-600 dark:text-amber-400">PostgreSQL</span>
+                  {/* <span className="text-[10px] font-normal text-amber-600 dark:text-amber-400">PostgreSQL</span> */}
                 </div>
                 <div className="p-1 space-y-1 max-h-72 overflow-y-auto">
                   {ramas.map(rama => {
@@ -157,8 +157,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setShowRamaMenu(false);
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors text-left ${isSelected
-                            ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800/60'
-                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800/60'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                           }`}
                       >
                         <div className="flex items-center space-x-2 truncate">

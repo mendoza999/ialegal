@@ -694,8 +694,8 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
   doc.setFontSize(6.5);
   doc.setTextColor(...COLORS.slateMuted);
   doc.text(`ID de Dictamen: ${traceId}`, margin + 5, signCardY + 11);
-  doc.text('Servidor Neo4j Knowledge Graph: 161.97.181.77 (Conectado)', margin + 5, signCardY + 15.5);
-  doc.text('Algoritmo de Recuperación: Vector Embeddings + Graph Traversals RAG', margin + 5, signCardY + 20);
+  doc.text('Server Knowledge Base (Conected)', margin + 5, signCardY + 15.5);
+  doc.text('Algoritmo de Recuperación: Vector Embeddings + Traversals RAG', margin + 5, signCardY + 20);
   doc.text('Validación Institucional: Sistema de Consulta Legal Automatizada', margin + 5, signCardY + 24.5);
 
   // Right Section: Digital Seal Box
@@ -716,11 +716,11 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6);
   doc.setTextColor(...COLORS.slateDark);
-  doc.text('LexTributario AI • Gaceta Jurídica', sealX + sealWidth / 2, sealY + 10, { align: 'center' });
+  doc.text('IALegal by algorimo juridico SAC', sealX + sealWidth / 2, sealY + 10, { align: 'center' });
 
   doc.setFontSize(5.5);
   doc.setTextColor(...COLORS.emerald);
-  doc.text('✓ Firma Digital y Verificación Activa', sealX + sealWidth / 2, sealY + 15, { align: 'center' });
+  doc.text('✓ Firma Digital y Verificación', sealX + sealWidth / 2, sealY + 15, { align: 'center' });
 
   cursorY += signCardHeight + 6;
 
@@ -737,7 +737,7 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(7);
       doc.setTextColor(...COLORS.slateMuted);
-      doc.text('LEXTRIBUTARIO AI', margin, 12);
+      doc.text('AI LEGAL', margin, 12);
 
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...COLORS.slateMuted);
@@ -761,7 +761,7 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6.5);
     doc.setTextColor(...COLORS.slateMuted);
-    doc.text('LexTributario AI — Plataforma Especializada de Inteligencia y Consultoría Jurídico-Tributaria', margin, footerY);
+    doc.text('IA Legal (C) Algorimo Jurídico SAC - Plataforma Especializada en Inteligencia Artificial - 2026', margin, footerY);
 
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...COLORS.slateDark);
@@ -773,8 +773,8 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
     .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g, '')
     .trim()
     .replace(/\s+/g, '_')
-    .slice(0, 35) || 'Dictamen_Tributario';
-
-  const fileName = `Dictamen_LexTributario_${cleanTitle}_${new Date().toISOString().split('T')[0]}.pdf`;
+    .slice(0, 35) || 'IA_Juridico';
+  const resultado = new Date().toISOString().replace('T', '-');
+  const fileName = `IA_Juridico_${cleanTitle}_${resultado}.pdf`;
   doc.save(fileName);
 }
