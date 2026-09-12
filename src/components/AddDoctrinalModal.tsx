@@ -55,7 +55,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
           setCategory(prev => (names.includes(prev) ? prev : names[0]));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -118,7 +118,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
       <div className="bg-[#111114] border border-[#222226] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        
+
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-[#222226] flex items-center justify-between bg-[#16161A]">
           <div className="flex items-center space-x-3">
@@ -150,7 +150,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 text-xs">
-          
+
           {error && (
             <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 flex items-center space-x-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -307,7 +307,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
             <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#BF092F] flex items-center space-x-1.5">
               <span>📁 Repositorio Google Drive (Carpeta Tributario)</span>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[10px] font-bold uppercase text-[#888] mb-1">

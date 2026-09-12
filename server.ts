@@ -562,11 +562,27 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         fileSize,
         fileName,
         fileBase64,
-        tags
+        tags,
+        ramaId: reqRamaId,
+        ramaNombre: reqRamaNombre
       } = req.body;
 
       if (!title || !textContent) {
         return res.status(400).json({ error: 'Título y contenido de texto son obligatorios.' });
+      }
+
+      // Validar rama contra PostgreSQL; por defecto Tributario (compatibilidad)
+      const { TRIBUTARIO_RAMA_ID } = await import('./server/knowledgeBase');
+      let ramaId = TRIBUTARIO_RAMA_ID;
+      let ramaNombre = reqRamaNombre || 'Derecho Tributario';
+      if (reqRamaId) {
+        try {
+          const rama = await prisma.ramaDerecho.findUnique({ where: { id: reqRamaId } });
+          if (rama) {
+            ramaId = rama.id;
+            ramaNombre = rama.nombre;
+          }
+        } catch { /* mantiene defecto */ }
       }
 
       const newId = `doc-custom-${Date.now()}`;
@@ -600,10 +616,10 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         docTitle: title,
         author: author || 'Autor no especificado',
         page: Math.floor(idx / 2) + 1,
-        chapter: `Capítulo ${(idx % 3) + 1}: Materia Tributaria General`,
+        chapter: `Capítulo ${(idx % 3) + 1}: Materia de ${ramaNombre}`,
         section: `Sección ${idx + 1}`,
         text: para.trim(),
-        entities: ['Derecho Tributario', categoryLabel || 'Doctrina Tributaria', title.split(' ')[0]],
+        entities: [ramaNombre, categoryLabel || 'Doctrina Jurídica', title.split(' ')[0]],
         articlesReferenced: []
       }));
 
@@ -625,8 +641,9 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         title,
         author: author || 'Autor no especificado',
         year: new Date().getFullYear(),
+        ramaId,
         category: category || 'doctrina',
-        categoryLabel: categoryLabel || 'Doctrina Tributaria',
+        categoryLabel: categoryLabel || 'Doctrina Jurídica',
         totalPages: totalPages || Math.ceil(paragraphs.length / 2) || 10,
         fileSize: fileSize || '2.4 MB',
         fileName: savedFileName,
@@ -635,8 +652,8 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         entitiesCount: Math.min(chunks.length * 2, 20),
         status: 'indexed',
         uploadDate: new Date().toISOString().split('T')[0],
-        description: description || 'Documento incorporado a la base de conocimiento tributaria.',
-        tags: tags || ['Derecho Tributario', 'Doctrina', 'PDF']
+        description: description || `Documento incorporado a la base de conocimiento de ${ramaNombre}.`,
+        tags: tags || [ramaNombre, 'Doctrina', 'PDF']
       };
 
       knowledgeBase.addDocument(newDoc, chunks, [bookNode]);

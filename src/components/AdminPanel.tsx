@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Neo4jConnectionConfig, TaxDocument, UserProfile } from '../types';
 import { useNotifications } from '../context/NotificationContext';
+import { useRama } from '../context/RamaContext';
 import { adminResetPassword } from '../services/authService';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -35,6 +36,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export const AdminPanel: React.FC = () => {
   const { addNotification } = useNotifications();
+  const { selectedRama } = useRama();
 
   const [activeTab, setActiveTab] = useState<'neo4j' | 'upload' | 'users' | 'metrics' | 'feedback'>('upload');
 
@@ -331,6 +333,8 @@ export const AdminPanel: React.FC = () => {
         body: JSON.stringify({
           title: uploadTitle,
           author: uploadAuthor || 'Doctrina Especializada',
+          ramaId: selectedRama?.id,
+          ramaNombre: selectedRama?.nombre,
           category: uploadCategory,
           categoryLabel: uploadCategory === 'impuesto_renta' ? 'Impuesto a la Renta' : uploadCategory === 'igv_iva' ? 'IGV e Imposición al Consumo' : 'Código Tributario',
           description: uploadDescription || `Documento procesado desde ${uploadedFileName || 'archivo cargado'}`,
@@ -350,7 +354,7 @@ export const AdminPanel: React.FC = () => {
       if (data.success) {
         addNotification({
           title: 'Documento Guardado e Indexado',
-          message: `"${uploadTitle}" fue indexado con éxito y enlazado al grafo Neo4j (${data.chunksIndexed} chunks).`,
+          message: `"${uploadTitle}" fue indexado con éxito en ${selectedRama?.nombre || 'la rama activa'} y enlazado al grafo Neo4j (${data.chunksIndexed} chunks).`,
           type: 'document_indexed'
         });
 
@@ -818,6 +822,11 @@ export const AdminPanel: React.FC = () => {
                     Cargar y Procesar Libro o PDF
                   </h3>
                 </div>
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-[11px] font-bold border border-amber-300 dark:border-amber-800" title="El libro se guardará en la rama activa">
+                  Se guarda en: {selectedRama?.nombre || 'General'}
+                </span>
+              </div>
+              <div className="flex items-center justify-end">
                 {uploadedFileName && (
                   <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-medium border border-emerald-500/20">
                     <Check className="h-3.5 w-3.5" />
