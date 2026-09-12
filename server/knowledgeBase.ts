@@ -300,6 +300,7 @@ export class KnowledgeBaseStore {
           title: d.title,
           author: d.author,
           year: d.year,
+          ramaId: d.ramaId || undefined,
           category: d.category as any,
           categoryLabel: d.categoryLabel,
           totalPages: d.totalPages,
