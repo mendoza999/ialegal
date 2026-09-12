@@ -28,7 +28,7 @@ import {
 import { Neo4jConnectionConfig, TaxDocument, UserProfile } from '../types';
 import { useNotifications } from '../context/NotificationContext';
 import { useRama } from '../context/RamaContext';
-import { adminResetPassword } from '../services/authService';
+import { adminResetPassword, getAuthHeaders } from '../services/authService';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -91,6 +91,9 @@ export const AdminPanel: React.FC = () => {
   // Visits State
   const [visitStats, setVisitStats] = useState<{ today: number; total: number }>({ today: 0, total: 0 });
 
+  // Access logs State
+  const [accessLogs, setAccessLogs] = useState<any[]>([]);
+
   // Categories State
   const [categories, setCategories] = useState<any[]>([]);
   const [newCatName, setNewCatName] = useState('');
@@ -132,6 +135,14 @@ export const AdminPanel: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (data.success) setVisitStats({ today: data.today || 0, total: data.total || 0 });
+      })
+      .catch(err => console.error(err));
+
+    // Fetch access logs
+    fetch(import.meta.env.BASE_URL + 'api/users/access-logs?limit=100', { headers: getAuthHeaders() })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.logs)) setAccessLogs(data.logs);
       })
       .catch(err => console.error(err));
 
@@ -1220,6 +1231,7 @@ export const AdminPanel: React.FC = () => {
 
       {/* Tab 4: Metrics & Audit */}
       {activeTab === 'metrics' && (
+        <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
             <span className="text-[10px] font-bold uppercase text-slate-400">Visitas Hoy</span>
@@ -1255,6 +1267,52 @@ export const AdminPanel: React.FC = () => {
             <p className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">100%</p>
             <p className="text-[11px] text-slate-500 mt-1">Exportable a PDF con sellos normativos</p>
           </div>
+        </div>
+
+        {/* Registro de accesos */}
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Registro de Accesos</h3>
+            <span className="text-[11px] text-slate-400">Fecha y hora • Usuario • Acción • IP pública • Dispositivo</span>
+          </div>
+          <div className="overflow-x-auto max-h-96 overflow-y-auto rounded-2xl border border-slate-100 dark:border-slate-800">
+            <table className="w-full text-left text-xs min-w-[720px]">
+              <thead className="bg-slate-50 dark:bg-slate-950/60 text-slate-500 uppercase text-[10px] tracking-wider sticky top-0">
+                <tr>
+                  <th className="px-3 py-2">Fecha / Hora</th>
+                  <th className="px-3 py-2">Usuario</th>
+                  <th className="px-3 py-2">Acción</th>
+                  <th className="px-3 py-2">IP Pública</th>
+                  <th className="px-3 py-2">Dispositivo / Navegador</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {accessLogs.map(log => (
+                  <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td className="px-3 py-2 font-mono text-[11px] text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                      {log.createdAt ? new Date(log.createdAt).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}
+                    </td>
+                    <td className="px-3 py-2">
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">{log.userName || log.userEmail}</p>
+                      <p className="text-[10px] text-slate-400">{log.userEmail}{log.userRole ? ` • ${log.userRole}` : ''}</p>
+                    </td>
+                    <td className="px-3 py-2">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        {log.action}
+                      </span>
+                      {log.details && <p className="text-[10px] text-slate-400 mt-0.5 max-w-[280px] truncate" title={log.details}>{log.details}</p>}
+                    </td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-slate-600 dark:text-slate-300 whitespace-nowrap">{log.ipAddress || '—'}</td>
+                    <td className="px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400" title={log.userAgent || ''}>{log.device || '—'}</td>
+                  </tr>
+                ))}
+                {accessLogs.length === 0 && (
+                  <tr><td colSpan={5} className="px-3 py-8 text-center text-slate-400">Sin registros de acceso.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
         </div>
       )}
 
