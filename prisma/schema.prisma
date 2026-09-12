@@ -250,3 +250,14 @@ model VisitCounter {
   count Int @default(0)
   @@map("visit_counters")
 }
+
+// Categorías de materia doctrinaria (antes hardcodeadas en el front)
+model DoctrinalCategory {
+  id String @id @default(uuid())
+  nombre String @unique
+  orden Int @default(0)
+  activo Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("doctrinal_categories")
+}

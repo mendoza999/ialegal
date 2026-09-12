@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, BookPlus, Sparkles, Check, AlertCircle } from 'lucide-react';
 import { DoctrinalEntry, TaxCategory } from '../types';
 import { useRama } from '../context/RamaContext';
@@ -9,7 +9,7 @@ interface AddDoctrinalModalProps {
   onAddEntry: (entry: DoctrinalEntry) => void;
 }
 
-const CATEGORIES: TaxCategory[] = [
+const FALLBACK_CATEGORIES: TaxCategory[] = [
   'IMPUESTO A LA RENTA',
   'IMPUESTO GENERAL A LAS VENTAS (IGV)',
   'CÓDIGO TRIBUTARIO',
@@ -41,6 +41,22 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
   const [publisher, setPublisher] = useState('');
 
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<TaxCategory[]>(FALLBACK_CATEGORIES);
+
+  // Categorías desde PostgreSQL (fallback local si falla)
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch(`${import.meta.env.BASE_URL}api/categories`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.categories) && data.categories.length > 0) {
+          const names = data.categories.map((c: any) => c.nombre as TaxCategory);
+          setCategories(names);
+          setCategory(prev => (names.includes(prev) ? prev : names[0]));
+        }
+      })
+      .catch(() => {});
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -194,7 +210,7 @@ export const AddDoctrinalModal: React.FC<AddDoctrinalModalProps> = ({
                 onChange={(e) => setCategory(e.target.value as TaxCategory)}
                 className="w-full px-3 py-2 bg-[#16161A] border border-[#222226] rounded-xl text-white focus:outline-none focus:border-[#BF092F]"
               >
-                {CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>

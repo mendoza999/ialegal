@@ -962,6 +962,66 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
     }
   });
 
+  // 7.3 Categorías doctrinarias (CRUD; la lista vive en PostgreSQL)
+  app.get('/api/categories', async (req, res) => {
+    try {
+      const all = req.query.all === '1';
+      const items = await prisma.doctrinalCategory.findMany({
+        where: all ? {} : { activo: true },
+        orderBy: [{ orden: 'asc' }, { nombre: 'asc' }],
+      });
+      res.json({ success: true, categories: items });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/categories', requireAdminAuth, async (req, res) => {
+    try {
+      const nombre = (req.body?.nombre || '').trim();
+      if (!nombre) return res.status(400).json({ error: 'El nombre es obligatorio.' });
+      if (nombre.length > 120) return res.status(400).json({ error: 'Máximo 120 caracteres.' });
+      const maxOrden = await prisma.doctrinalCategory.aggregate({ _max: { orden: true } });
+      const cat = await prisma.doctrinalCategory.create({
+        data: { nombre, orden: (maxOrden._max.orden ?? -1) + 1 },
+      });
+      res.json({ success: true, category: cat });
+    } catch (e: any) {
+      if (e?.code === 'P2002') return res.status(409).json({ error: 'Esa categoría ya existe.' });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.put('/api/categories/:id', requireAdminAuth, async (req, res) => {
+    try {
+      const data: any = {};
+      if (req.body?.nombre !== undefined) {
+        const nombre = String(req.body.nombre).trim();
+        if (!nombre) return res.status(400).json({ error: 'El nombre es obligatorio.' });
+        if (nombre.length > 120) return res.status(400).json({ error: 'Máximo 120 caracteres.' });
+        data.nombre = nombre;
+      }
+      if (req.body?.activo !== undefined) data.activo = !!req.body.activo;
+      if (req.body?.orden !== undefined && Number.isFinite(Number(req.body.orden))) data.orden = Number(req.body.orden);
+      const cat = await prisma.doctrinalCategory.update({ where: { id: req.params.id }, data });
+      res.json({ success: true, category: cat });
+    } catch (e: any) {
+      if (e?.code === 'P2002') return res.status(409).json({ error: 'Esa categoría ya existe.' });
+      if (e?.code === 'P2025') return res.status(404).json({ error: 'Categoría no encontrada.' });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.delete('/api/categories/:id', requireAdminAuth, async (req, res) => {
+    try {
+      await prisma.doctrinalCategory.delete({ where: { id: req.params.id } });
+      res.json({ success: true });
+    } catch (e: any) {
+      if (e?.code === 'P2025') return res.status(404).json({ error: 'Categoría no encontrada.' });
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // 7.2 Contador de visitas persistente (una fila por día)
   app.post('/api/visits/hit', async (req, res) => {
     try {

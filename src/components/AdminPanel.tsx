@@ -22,7 +22,8 @@ import {
   BookOpen,
   Sparkles,
   Check,
-  MessageSquareText
+  MessageSquareText,
+  Trash2
 } from 'lucide-react';
 import { Neo4jConnectionConfig, TaxDocument, UserProfile } from '../types';
 import { useNotifications } from '../context/NotificationContext';
@@ -39,12 +40,12 @@ export const AdminPanel: React.FC = () => {
 
   // Neo4j State
   const [neo4jConfig, setNeo4jConfig] = useState<Neo4jConnectionConfig>({
-    host: 'bolt://161.97.181.77:7687',
-    boltPort: 7687,
-    httpPort: 7474,
-    user: 'neo4j',
-    pass: 'Amcp120..',
-    database: 'neo4j',
+    host: 'bolt://161.97.181.77:7688',
+    boltPort: 7688,
+    httpPort: 7475,
+    user: 'ongdb',
+    pass: '$$$Amcp120$$$',
+    database: 'neonormaslegales',
     status: 'connected',
     nodeCount: 323,
     relationshipCount: 458
@@ -88,6 +89,12 @@ export const AdminPanel: React.FC = () => {
   // Visits State
   const [visitStats, setVisitStats] = useState<{ today: number; total: number }>({ today: 0, total: 0 });
 
+  // Categories State
+  const [categories, setCategories] = useState<any[]>([]);
+  const [newCatName, setNewCatName] = useState('');
+  const [editingCatId, setEditingCatId] = useState<string | null>(null);
+  const [editingCatName, setEditingCatName] = useState('');
+
   // Reset password state (per-row inline form)
   const [resetPwUserId, setResetPwUserId] = useState<string | null>(null);
   const [resetPwValue, setResetPwValue] = useState('');
@@ -123,6 +130,14 @@ export const AdminPanel: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (data.success) setVisitStats({ today: data.today || 0, total: data.total || 0 });
+      })
+      .catch(err => console.error(err));
+
+    // Fetch categories (incluye inactivas para gestión)
+    fetch(import.meta.env.BASE_URL + 'api/categories?all=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.categories)) setCategories(data.categories);
       })
       .catch(err => console.error(err));
   }, []);
@@ -384,6 +399,90 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  // Categories CRUD
+  const refreshCategories = async () => {
+    try {
+      const res = await fetch(import.meta.env.BASE_URL + 'api/categories?all=1');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.categories)) setCategories(data.categories);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    try {
+      const res = await fetch(import.meta.env.BASE_URL + 'api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: newCatName.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewCatName('');
+        await refreshCategories();
+        addNotification({ title: 'Categoría creada', message: data.category.nombre, type: 'success' });
+      } else {
+        addNotification({ title: 'No se pudo crear', message: data.error || 'Error.', type: 'warning' });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRenameCategory = async (id: string) => {
+    if (!editingCatName.trim()) return;
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: editingCatName.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditingCatId(null);
+        setEditingCatName('');
+        await refreshCategories();
+      } else {
+        addNotification({ title: 'No se pudo renombrar', message: data.error || 'Error.', type: 'warning' });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleCategory = async (id: string, activo: boolean) => {
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activo: !activo })
+      });
+      const data = await res.json();
+      if (data.success) await refreshCategories();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string, nombre: string) => {
+    if (!window.confirm(`¿Eliminar la categoría "${nombre}"?`)) return;
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}api/categories/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        await refreshCategories();
+        addNotification({ title: 'Categoría eliminada', message: nombre, type: 'success' });
+      } else {
+        addNotification({ title: 'No se pudo eliminar', message: data.error || 'Error.', type: 'warning' });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleResetPassword = async (e: React.FormEvent, userId: string, userName: string) => {
     e.preventDefault();
     if (!resetPwValue || resetPwValue.length < 6) {
@@ -483,8 +582,8 @@ export const AdminPanel: React.FC = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === tab.id
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                 }`}
             >
               <Icon className="h-4 w-4" />
@@ -734,8 +833,8 @@ export const AdminPanel: React.FC = () => {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={`p-6 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center space-y-2 ${isDragging
-                    ? 'border-amber-500 bg-amber-500/10 scale-[1.01]'
-                    : 'border-slate-300 dark:border-slate-700 hover:border-amber-500/50 bg-slate-50 dark:bg-slate-800/40'
+                  ? 'border-amber-500 bg-amber-500/10 scale-[1.01]'
+                  : 'border-slate-300 dark:border-slate-700 hover:border-amber-500/50 bg-slate-50 dark:bg-slate-800/40'
                   }`}
               >
                 <input
@@ -854,6 +953,95 @@ export const AdminPanel: React.FC = () => {
               </div>
             </form>
           </div>
+
+          {/* Gestor de Categorías de Materia */}
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Categorías de Materia Doctrinaria
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Se usan en el formulario de nuevo libro. Desactivar oculta sin borrar.
+                </p>
+              </div>
+              <form onSubmit={handleAddCategory} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newCatName}
+                  onChange={e => setNewCatName(e.target.value)}
+                  placeholder="Nueva categoría..."
+                  maxLength={120}
+                  className="w-56 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white text-xs border border-slate-200 dark:border-slate-700"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span>Agregar</span>
+                </button>
+              </form>
+            </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {categories.map(cat => (
+                <div key={cat.id} className="py-2.5 flex items-center justify-between gap-3">
+                  {editingCatId === cat.id ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="text"
+                        value={editingCatName}
+                        onChange={e => setEditingCatName(e.target.value)}
+                        maxLength={120}
+                        autoFocus
+                        className="flex-1 p-2 rounded-xl bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs border border-slate-200 dark:border-slate-700"
+                      />
+                      <button onClick={() => handleRenameCategory(cat.id)} className="px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors">
+                        Guardar
+                      </button>
+                      <button onClick={() => setEditingCatId(null)} className="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${cat.activo ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+                        <span className={`text-xs font-semibold truncate ${cat.activo ? 'text-slate-900 dark:text-white' : 'text-slate-400 line-through'}`}>
+                          {cat.nombre}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => { setEditingCatId(cat.id); setEditingCatName(cat.nombre); }}
+                          className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
+                        >
+                          Renombrar
+                        </button>
+                        <button
+                          onClick={() => handleToggleCategory(cat.id, cat.activo)}
+                          className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-950 text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                        >
+                          {cat.activo ? 'Desactivar' : 'Activar'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCategory(cat.id, cat.nombre)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+              {categories.length === 0 && (
+                <p className="text-xs text-slate-400 py-4 text-center">Sin categorías registradas.</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -955,46 +1143,46 @@ export const AdminPanel: React.FC = () => {
             {users.map(u => (
               <div key={u.id}>
                 <div className="py-3.5 flex items-center justify-between min-w-[500px]">
-                <div className="flex items-center space-x-3">
-                  <img src={u.avatar} alt={u.name} className="h-10 w-10 rounded-xl object-cover" />
-                  <div>
-                    <p className="text-xs font-bold text-slate-900 dark:text-white">{u.name}</p>
-                    <p className="text-[11px] text-slate-400">{u.email} • {u.organization}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-400 block">Consultas Realizadas</span>
-                    <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
-                      {u.queryCount} queries
-                    </span>
+                  <div className="flex items-center space-x-3">
+                    <img src={u.avatar} alt={u.name} className="h-10 w-10 rounded-xl object-cover" />
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">{u.name}</p>
+                      <p className="text-[11px] text-slate-400">{u.email} • {u.organization}</p>
+                    </div>
                   </div>
 
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${u.role === 'admin'
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-400 block">Consultas Realizadas</span>
+                      <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
+                        {u.queryCount} queries
+                      </span>
+                    </div>
+
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${u.role === 'admin'
                       ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}>
-                    {u.role}
-                  </span>
+                      }`}>
+                      {u.role}
+                    </span>
 
-                  <button
-                    onClick={() => handleToggleUserRole(u.id, u.role)}
-                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 text-slate-700 dark:text-slate-300 hover:text-amber-800 transition-colors"
-                  >
-                    Cambiar a {u.role === 'admin' ? 'Usuario' : 'Admin'}
-                  </button>
+                    <button
+                      onClick={() => handleToggleUserRole(u.id, u.role)}
+                      className="px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-amber-100 text-slate-700 dark:text-slate-300 hover:text-amber-800 transition-colors"
+                    >
+                      Cambiar a {u.role === 'admin' ? 'Usuario' : 'Admin'}
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      setResetPwUserId(resetPwUserId === u.id ? null : u.id);
-                      setResetPwValue('');
-                    }}
-                    className="px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-950 text-slate-700 dark:text-slate-300 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
-                  >
-                    Clave
-                  </button>
-                </div>
+                    <button
+                      onClick={() => {
+                        setResetPwUserId(resetPwUserId === u.id ? null : u.id);
+                        setResetPwValue('');
+                      }}
+                      className="px-3 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-950 text-slate-700 dark:text-slate-300 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                    >
+                      Clave
+                    </button>
+                  </div>
                 </div>
                 {resetPwUserId === u.id && (
                   <form onSubmit={e => handleResetPassword(e, u.id, u.name)} className="flex items-center gap-2 py-2 ml-[52px] animate-in slide-in-from-top-1">

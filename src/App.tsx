@@ -37,7 +37,7 @@ function MainAppContent() {
       {showPromo && (
         <div className="relative bg-gradient-to-r from-[#A10727] via-[#BF092F] to-[#A10727] text-white px-4 py-2 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-widest shadow">
           <Sparkles className="h-4 w-4 shrink-0" />
-          <span> **** VERSION BETA ::: GRATUITO POR TIEMPO LIMITADO ***** </span>
+          <span> **** VERSION BETA ::: GRATUITO POR TIEMPO LIMITADO  ***** </span>
           <button
             onClick={() => setShowPromo(false)}
             aria-label="Cerrar aviso"
@@ -92,7 +92,7 @@ function AppContent() {
   useEffect(() => {
     if (sessionStorage.getItem('ialegal_visit_hit')) return;
     sessionStorage.setItem('ialegal_visit_hit', '1');
-    fetch(`${import.meta.env.BASE_URL}api/visits/hit`, { method: 'POST' }).catch(() => {});
+    fetch(`${import.meta.env.BASE_URL}api/visits/hit`, { method: 'POST' }).catch(() => { });
   }, []);
 
   return isAuthenticated ? <MainAppContent /> : <LoginScreen />;

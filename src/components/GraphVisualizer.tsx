@@ -324,11 +324,10 @@ export const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-colors ${
-                  filterType === type
+                className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-colors ${filterType === type
                     ? 'bg-amber-600 text-white shadow-xs'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  }`}
               >
                 {type === 'ALL' ? 'Todos' : type}
               </button>
