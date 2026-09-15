@@ -6,7 +6,7 @@ import { knowledgeBase } from './server/knowledgeBase';
 import { neo4jService } from './server/neo4jService';
 import { ragEngine } from './server/ragEngine';
 import { TaxDocument, DocumentChunk, GraphNode, GraphLink } from './src/types';
-import { usersStore } from './server/usersStore';
+import { usersStore, UNLIMITED_QUERIES } from './server/usersStore';
 import { chatStore } from './server/chatStore';
 import { prisma } from './server/db';
 
@@ -215,9 +215,10 @@ async function startServer() {
       }
 
       // Check daily 5 web queries limit if Web Grounding is requested
+      // (admin con cupo ilimitado: limit === UNLIMITED_QUERIES pasa directo)
       if (enableWebGrounding) {
         const usage = await usersStore.getWebQueryUsage(userId);
-        if (usage.remaining <= 0) {
+        if (usage.limit !== UNLIMITED_QUERIES && usage.remaining <= 0) {
           const limitAnswer = `### ⚠️ Límite Diario de Búsqueda Web Alcanzado (5/5)
 
 Has alcanzado el límite máximo de **5 consultas de Búsqueda Web por día**.
@@ -253,9 +254,10 @@ Para continuar realizando consultas hoy:
       }
 
       // Check daily 5 local queries limit for non-web (RAG local) queries
+      // (admin con cupo ilimitado: limit === UNLIMITED_QUERIES pasa directo)
       if (!enableWebGrounding) {
         const localUsage = await usersStore.getLocalQueryUsage(userId);
-        if (localUsage.remaining <= 0) {
+        if (localUsage.limit !== UNLIMITED_QUERIES && localUsage.remaining <= 0) {
           const limitAnswer = `### ⚠️ Límite Diario de Búsqueda Local Alcanzado (5/5)
 
 Has alcanzado el límite máximo de **5 consultas locales por día**.

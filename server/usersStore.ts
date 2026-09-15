@@ -6,6 +6,7 @@ import { UserProfile, UserRole, AccessLogEntry } from '../src/types';
 // Cupos diarios por tipo de consulta (req. 5 local + 5 web)
 export const DAILY_WEB_LIMIT = 5;
 export const DAILY_LOCAL_LIMIT = 5;
+export const UNLIMITED_QUERIES = -1; // Significa ilimitado
 
 export function parseDeviceAndBrowser(userAgent?: string): { device: string; browser: string; os: string } {
   if (!userAgent) return { device: 'Desconocido', browser: 'Navegador Web', os: 'SO Desconocido' };
@@ -510,6 +511,11 @@ export class UsersStore {
         return { count: 0, limit, remaining: limit, resetDate: today };
       }
 
+      // Si es admin, ilimitadas
+      if (u.role === 'admin') {
+        return { count: u.dailyWebCount, limit: UNLIMITED_QUERIES, remaining: UNLIMITED_QUERIES, resetDate: today };
+      }
+
       if (u.dailyWebDate !== today) {
         await prisma.user.update({
           where: { id: userId },
@@ -543,6 +549,19 @@ export class UsersStore {
 
       if (!u) return true;
 
+      // Si es admin, siempre permite incrementar (ilimitado)
+      if (u.role === 'admin') {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            dailyWebDate: today,
+            dailyWebCount: u.dailyWebCount + 1,
+            queryCount: (u.queryCount || 0) + 1,
+          },
+        });
+        return true;
+      }
+
       let currentCount = u.dailyWebCount;
       if (u.dailyWebDate !== today) {
         currentCount = 0;
@@ -557,7 +576,7 @@ export class UsersStore {
         data: {
           dailyWebDate: today,
           dailyWebCount: currentCount + 1,
-          queryCount: u.queryCount + 1,
+          queryCount: (u.queryCount || 0) + 1,
         },
       });
 
@@ -583,6 +602,11 @@ export class UsersStore {
 
       if (!u) {
         return { count: 0, limit, remaining: limit, resetDate: today };
+      }
+
+      // Si es admin, ilimitadas
+      if (u.role === 'admin') {
+        return { count: u.dailyLocalCount, limit: UNLIMITED_QUERIES, remaining: UNLIMITED_QUERIES, resetDate: today };
       }
 
       if (u.dailyLocalDate !== today) {
@@ -617,6 +641,18 @@ export class UsersStore {
       });
 
       if (!u) return true;
+
+      // Si es admin, siempre permite incrementar (ilimitado)
+      if (u.role === 'admin') {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            dailyLocalDate: today,
+            dailyLocalCount: u.dailyLocalCount + 1,
+          },
+        });
+        return true;
+      }
 
       let currentCount = u.dailyLocalCount;
       if (u.dailyLocalDate !== today) {

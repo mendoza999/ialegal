@@ -99,6 +99,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
   const [inputQuery, setInputQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(true);
 
   // RAG Filters and Grounding Toggles
   const [enableHybridSearch, setEnableHybridSearch] = useState<boolean>(true);
@@ -299,7 +300,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
     if (!query || isLoading) return;
 
     // Local daily quota guard (web quota is enforced when grounding is on)
-    if (!enableWebGrounding && localUsage.remaining <= 0) {
+    // Permite la consulta si el usuario tiene ilimitadas (remaining === -1)
+    const hasLocalLimit = localUsage.limit !== -1 && localUsage.remaining <= 0;
+    if (!enableWebGrounding && hasLocalLimit) {
       addNotification({
         title: 'Límite Diario Alcanzado',
         message: 'Has utilizado las 5 consultas locales disponibles para hoy. Podrás realizar más mañana.',
@@ -307,16 +310,15 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
       });
       return;
     }
-
     setInputQuery('');
-
+    console.log('hasLocalLimit', hasLocalLimit);
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: 'user',
       content: query,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-
+    console.log('userMessage', userMessage);
     // Update session title if first user message
     let sessionTitle = currentSession.title;
     if (currentSession.messages.length === 0 || currentSession.title.startsWith('Nueva Consulta')) {
@@ -477,7 +479,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
       <FeedbackWidget />
 
       {/* Left Sidebar: Chat History */}
-      <div className="w-full md:w-72 lg:w-80 flex flex-col rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 space-y-4 shrink-0 hidden sm:flex">
+      <div className={`w-full ${showHistory ? 'md:w-72 lg:w-80 flex flex-col rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 space-y-4 shrink-0 sm:flex' : 'w-0 hidden'}`}>
         <button
           id="new-chat-btn"
           onClick={handleNewChat}
@@ -539,12 +541,19 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
       </div>
 
       {/* Main Chat Container */}
-      <div className="flex-1 flex flex-col rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden min-w-0">
+      <div className={`flex-1 flex flex-col rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden min-w-0 ${showHistory ? '' : 'w-full'} `}>
 
         {/* Top Control Bar */}
         <div className="px-4 sm:px-6 py-3 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 bg-slate-50/70 dark:bg-slate-900/70 backdrop-blur-xs">
 
           <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowHistory(prev => !prev)}
+              className="p-1.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold hover:bg-slate-300 dark:hover:text-white transition-all"
+              title={showHistory ? 'Ocultar historial' : 'Mostrar historial'}
+            >
+              {showHistory ? <Eye className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
+            </button>
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px] sm:max-w-xs">
               {currentSession.title}
             </span>
@@ -589,7 +598,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
             {/* Web Grounding Toggle with Daily 5 Limit */}
             <button
               onClick={() => {
-                if (!enableWebGrounding && webUsage.remaining <= 0) {
+                // Permite activar si el usuario tiene ilimitadas (remaining === -1)
+                const hasWebLimit = webUsage.limit !== -1 && webUsage.remaining <= 0;
+                if (!enableWebGrounding && hasWebLimit) {
                   addNotification({
                     title: 'Límite Diario Alcanzado',
                     message: 'Has utilizado las 5 consultas web disponibles para hoy. Podrás realizar más mañana o consultar la base local (5 diarias).',
@@ -667,7 +678,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
                 )}
 
                 <div
-                  className={`max-w-[90%] sm:max-w-2xl lg:max-w-3xl rounded-3xl p-5 shadow-xs space-y-4 ${msg.role === 'user'
+                  className={`max-w-[95%] rounded-3xl p-5 shadow-xs space-y-4 ${msg.role === 'user'
                     ? 'bg-amber-600 text-white rounded-tr-xs'
                     : 'bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-slate-800 rounded-tl-xs'
                     }`}
