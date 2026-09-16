@@ -42,7 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setCurrentTab,
   neo4jConfig
 }) => {
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, logout, isGuest, exitGuestMode } = useAuth();
   const {
     isDarkMode,
     toggleDarkMode,
@@ -247,7 +247,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
               <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
               <span className="hidden sm:inline">
-                {activeUsersCount} {activeUsersCount === 1 ? 'Usuario activo' : 'Usuarios activos'}
+                {activeUsersCount} {activeUsersCount === 1 ? 'Active user' : 'active users'}
               </span>
               <span className="sm:hidden font-bold">
                 {activeUsersCount}
@@ -492,7 +492,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             ) : (
               <button
-                onClick={logout}
+                onClick={isGuest ? exitGuestMode : logout}
                 className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
               >
                 <User className="h-3.5 w-3.5" />

@@ -89,7 +89,7 @@ const DEFAULT_SESSION: ChatSession = {
 };
 
 export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocForChat }) => {
-  const { user, sessionToken } = useAuth();
+  const { user, sessionToken, isGuest, exitGuestMode } = useAuth();
   const { addNotification } = useNotifications();
   const { selectedRama } = useRama();
 
@@ -145,6 +145,17 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
           }
         })
         .catch(err => console.error(err));
+    } else if (isGuest) {
+      // Invitado: cupo real por IP (2/día) para que los badges no muestren 5/5
+      fetch(`${import.meta.env.BASE_URL}api/guest/usage`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && typeof data.remaining === 'number') {
+            setWebUsage(data);
+            setLocalUsage(data);
+          }
+        })
+        .catch(err => console.error(err));
     }
 
     const ramaParam = selectedRama?.id ? `?ramaId=${selectedRama.id}` : '';
@@ -166,7 +177,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
         }
       })
       .catch(err => console.error(err));
-  }, [user?.id, selectedRama?.id]);
+  }, [user?.id, isGuest, selectedRama?.id]);
 
   // Load user sessions from PostgreSQL database filtered by active Rama
   const loadUserSessions = async (userId: string, ramaId?: string) => {
@@ -311,14 +322,14 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
       return;
     }
     setInputQuery('');
-    console.log('hasLocalLimit', hasLocalLimit);
+
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: 'user',
       content: query,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    console.log('userMessage', userMessage);
+
     // Update session title if first user message
     let sessionTitle = currentSession.title;
     if (currentSession.messages.length === 0 || currentSession.title.startsWith('Nueva Consulta')) {
@@ -380,6 +391,19 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
       });
 
       const data = await res.json();
+
+      // Invitado agotó sus 2 consultas gratis → pedir login
+      if (data.guestLimitReached) {
+        if (data.localUsage) setLocalUsage(data.localUsage);
+        if (data.webUsage) setWebUsage(data.webUsage);
+        addNotification({
+          title: 'Inicia sesión para continuar',
+          message: 'Usaste tus 2 consultas gratis de hoy. Crea tu cuenta o ingresa para seguir consultando.',
+          type: 'warning'
+        });
+        exitGuestMode();
+        return;
+      }
 
       if (data.webUsage) {
         setWebUsage(data.webUsage);

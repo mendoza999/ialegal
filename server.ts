@@ -162,6 +162,18 @@ async function startServer() {
     }
   });
 
+  // 0b. Cupo de invitado (sin login) por IP pública
+  app.get('/api/guest/usage', async (req, res) => {
+    try {
+      const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
+        || req.socket.remoteAddress || (req as any).ip || '';
+      const usage = await usersStore.getGuestQueryUsage(ip);
+      res.json({ success: true, ...usage });
+    } catch (e: any) {
+      res.json({ success: true, count: 0, limit: 2, remaining: 2 });
+    }
+  });
+
   // 1. RAG & Chat Query Endpoint with Full PostgreSQL Persistence
   app.post('/api/chat/query', async (req, res) => {
     try {
@@ -197,6 +209,27 @@ async function startServer() {
             error: 'Sesión finalizada',
             code: 'CONCURRENT_SESSION_DETECTED',
             message: 'Se ha detectado un inicio de sesión con esta cuenta en otro dispositivo o navegador. Tu sesión actual ha sido cerrada por seguridad.'
+          });
+        }
+      }
+
+      // Acceso invitado (sin login): 2 consultas diarias por IP, luego login obligatorio.
+      // Kill-switch: REQUIRE_LOGIN=true restaura el flujo con login obligatorio.
+      const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
+        || req.socket.remoteAddress || (req as any).ip || '';
+      let guestUsage: { count: number; limit: number; remaining: number; resetDate: string } | null = null;
+      if (!userId) {
+        if (process.env.REQUIRE_LOGIN === 'true') {
+          return res.status(401).json({ error: 'Se requiere inicio de sesión.', code: 'LOGIN_REQUIRED' });
+        }
+        guestUsage = await usersStore.getGuestQueryUsage(clientIp);
+        if (guestUsage.remaining <= 0) {
+          return res.status(403).json({
+            error: 'Usaste tus 2 consultas gratis de hoy. Inicia sesión o crea tu cuenta para continuar.',
+            code: 'GUEST_LIMIT_REACHED',
+            guestLimitReached: true,
+            localUsage: guestUsage,
+            webUsage: guestUsage
           });
         }
       }
@@ -330,7 +363,7 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         }
       }
 
-      // Log access and query count for user
+      // Log access and query count for user (invitados también, por IP)
       if (userId) {
         try {
           await usersStore.incrementQueryCount(userId);
@@ -343,10 +376,23 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         } catch (logErr) {
           // ignore
         }
+      } else {
+        try {
+          await usersStore.recordAccessLog({
+            userEmail: 'invitado@ialegal',
+            ipAddress: clientIp,
+            userAgent: req.headers['user-agent'] as string,
+            action: 'QUERY',
+            details: `Consulta invitado (${ramaNombre || ramaId || 'General'}): ${query.slice(0, 80)}...`
+          });
+          guestUsage = await usersStore.getGuestQueryUsage(clientIp);
+        } catch (logErr) {
+          // ignore
+        }
       }
 
-      const currentUsage = userId ? await usersStore.getWebQueryUsage(userId) : { count: 0, limit: 5, remaining: 5 };
-      const currentLocalUsage = userId ? await usersStore.getLocalQueryUsage(userId) : { count: 0, limit: 5, remaining: 5 };
+      const currentUsage = userId ? await usersStore.getWebQueryUsage(userId) : (guestUsage || { count: 0, limit: 2, remaining: 2 });
+      const currentLocalUsage = userId ? await usersStore.getLocalQueryUsage(userId) : (guestUsage || { count: 0, limit: 2, remaining: 2 });
 
       res.json({
         ...result,

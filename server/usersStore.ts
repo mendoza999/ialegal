@@ -7,6 +7,7 @@ import { UserProfile, UserRole, AccessLogEntry } from '../src/types';
 export const DAILY_WEB_LIMIT = 5;
 export const DAILY_LOCAL_LIMIT = 5;
 export const UNLIMITED_QUERIES = -1; // Significa ilimitado
+export const GUEST_DAILY_LIMIT = 2; // Consultas diarias por IP sin login
 
 export function parseDeviceAndBrowser(userAgent?: string): { device: string; browser: string; os: string } {
   if (!userAgent) return { device: 'Desconocido', browser: 'Navegador Web', os: 'SO Desconocido' };
@@ -675,6 +676,26 @@ export class UsersStore {
     } catch (err) {
       console.error(`[UsersStore] Error incrementing local usage for ${userId}:`, err);
       return true;
+    }
+  }
+
+  /**
+   * Cupo de invitado (sin login): 2 consultas diarias por IP pública.
+   * Cuenta eventos QUERY de hoy en access_logs sin userId. Sin cambios de esquema.
+   */
+  public async getGuestQueryUsage(ipAddress?: string): Promise<{ count: number; limit: number; remaining: number; resetDate: string }> {
+    const today = new Date().toISOString().split('T')[0];
+    const limit = GUEST_DAILY_LIMIT;
+    const cleanIp = cleanClientIp(ipAddress);
+    try {
+      const startOfDay = new Date(`${today}T00:00:00.000Z`);
+      const count = await prisma.accessLog.count({
+        where: { userId: null, action: 'QUERY', ipAddress: cleanIp, createdAt: { gte: startOfDay } },
+      });
+      return { count, limit, remaining: Math.max(0, limit - count), resetDate: today };
+    } catch (err) {
+      console.error(`[UsersStore] Error checking guest usage for ${cleanIp}:`, err);
+      return { count: 0, limit, remaining: limit, resetDate: today };
     }
   }
 

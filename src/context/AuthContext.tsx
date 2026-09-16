@@ -6,10 +6,13 @@ interface AuthContextType {
   sessionToken: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isGuest: boolean;
   concurrentSessionAlert: boolean;
   dismissConcurrentAlert: () => void;
   login: (email: string, password?: string) => Promise<boolean>;
   logout: () => void;
+  enterGuestMode: () => void;
+  exitGuestMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +35,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [concurrentSessionAlert, setConcurrentSessionAlert] = useState<boolean>(false);
+
+  // Modo invitado: entra sin login, 2 consultas diarias por IP
+  const [isGuest, setIsGuest] = useState<boolean>(() => {
+    return localStorage.getItem('ialegal_guest') === '1';
+  });
+
+  const enterGuestMode = useCallback(() => {
+    setIsGuest(true);
+    localStorage.setItem('ialegal_guest', '1');
+  }, []);
+
+  const exitGuestMode = useCallback(() => {
+    setIsGuest(false);
+    localStorage.removeItem('ialegal_guest');
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -65,6 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSessionToken(null);
     localStorage.removeItem('lex_current_user');
     localStorage.removeItem('lex_session_token');
+    localStorage.removeItem('ialegal_guest');
+    setIsGuest(false);
   }, [user?.id]);
 
   const handleConcurrentKick = useCallback(() => {
@@ -130,6 +150,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(data.user);
         setSessionToken(data.sessionToken);
         setConcurrentSessionAlert(false);
+        setIsGuest(false);
+        localStorage.removeItem('ialegal_guest');
         return true;
       }
       return false;
@@ -150,10 +172,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sessionToken,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'admin',
+        isGuest,
         concurrentSessionAlert,
         dismissConcurrentAlert,
         login,
-        logout
+        logout,
+        enterGuestMode,
+        exitGuestMode
       }}
     >
       {children}

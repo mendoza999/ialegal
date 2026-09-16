@@ -86,7 +86,7 @@ function MainAppContent() {
 }
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isGuest } = useAuth();
 
   // Contador de visitas: 1 hit por pestaña (sessionStorage), persistente en PG
   useEffect(() => {
@@ -95,7 +95,7 @@ function AppContent() {
     fetch(`${import.meta.env.BASE_URL}api/visits/hit`, { method: 'POST' }).catch(() => { });
   }, []);
 
-  return isAuthenticated ? <MainAppContent /> : <LoginScreen />;
+  return (isAuthenticated || isGuest) ? <MainAppContent /> : <LoginScreen />;
 }
 
 export default function App() {
