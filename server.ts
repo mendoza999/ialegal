@@ -335,6 +335,26 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         enableWebGrounding: enableWebGrounding ?? false
       });
 
+      // Agente corrector: verifica y corrige la respuesta LLM contra normativa vigente
+      if (result.answer && result.citations) {
+        try {
+          const review = await usersStore.reviewWithCorrectionAgent({
+            rawAnswer: result.answer,
+            chunks: result.citations,
+            query,
+            branchLabel: ramaNombre || ramaId || ''
+          });
+          if (review && review.wasCorrected) {
+            result.confidenceScore = Math.max(75, result.confidenceScore + 5);
+            result.corrections = review;
+            result.answer = review.correctedAnswer;
+            console.log(`[Server] Agente corrector: ${review.appliedRules?.length || 0} regla(s) aplicada(s).`);
+          }
+        } catch (reviewErr) {
+          console.warn('[Server] Agente corrector falló, usando respuesta original:', reviewErr);
+        }
+      }
+
       // Increment web usage if web grounding was executed, else local usage
       if (enableWebGrounding && result.isWebGrounded) {
         await usersStore.incrementWebQueryUsage(userId);
@@ -356,7 +376,8 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
             searchGroundingSources: result.searchGroundingSources,
             isWebGrounded: result.isWebGrounded,
             ragTypeUsed: result.ragTypeUsed,
-            confidenceScore: result.confidenceScore
+            confidenceScore: result.confidenceScore,
+            corrections: result.corrections
           });
         } catch (saveAssistantErr) {
           console.warn('[Server] Error saving assistant response message:', saveAssistantErr);

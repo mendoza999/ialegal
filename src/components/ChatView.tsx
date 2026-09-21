@@ -22,7 +22,9 @@ import {
   ArrowRight,
   ExternalLink,
   ChevronRight,
-  Filter
+  Filter,
+  AlertTriangle,
+  Wrench
 } from 'lucide-react';
 import { ChatMessage, ChatSession, Citation, TaxDocument } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -428,7 +430,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
         isWebGrounded: data.isWebGrounded || false,
         ragTypeUsed: data.ragTypeUsed || 'hybrid',
         confidenceScore: data.confidenceScore || 95,
-        executiveSummary: data.executiveSummary
+        executiveSummary: data.executiveSummary,
+        corrections: data.corrections
       };
 
       setSessions(prev =>
@@ -486,9 +489,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
       searchGroundingSources: msg.searchGroundingSources || [],
       userName: user?.name,
       organization: user?.organization,
-      isWebGrounded: msg.isWebGrounded,
-      ragTypeUsed: msg.ragTypeUsed === 'web' ? 'Grounding Web + RAG' : 'Híbrido (Vector + Neo4j GraphRAG)',
-      confidenceScore: msg.confidenceScore || 96
+isWebGrounded: msg.isWebGrounded,
+          ragTypeUsed: msg.ragTypeUsed === 'web' ? 'Grounding Web + RAG' : 'Híbrido (Vector + Neo4j GraphRAG)',
+          corrections: msg.corrections,
+          confidenceScore: msg.confidenceScore || 96
     });
 
     addNotification({
@@ -719,6 +723,28 @@ export const ChatView: React.FC<ChatViewProps> = ({ onOpenCitation, selectedDocF
                       </div>
                     )}
                   </div>
+
+                  {/* Agente corrector: badge visible si se corrigió la respuesta */}
+                  {msg.role === 'assistant' && msg.corrections && msg.corrections.wasCorrected && (
+                    <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/70 space-y-1.5">
+                      <div className="flex items-center space-x-1.5 text-xs font-bold text-amber-800 dark:text-amber-400">
+                        <Wrench className="h-3.5 w-3.5" />
+                        <span>Corregido por Revisión Normativa</span>
+                      </div>
+                      <p className="text-[11px] text-amber-800 dark:text-amber-300/90 leading-snug">
+                        Agente revisor aplicó ajuste(s) para alinearse a la normativa vigente peruana.
+                      </p>
+                      {msg.corrections.appliedRules && msg.corrections.appliedRules.length > 0 && (
+                        <ul className="pl-4 text-[10px] text-amber-800/90 dark:text-amber-300/80 space-y-0.5">
+                          {msg.corrections.appliedRules.map((r, i) => (
+                            <li key={i} className="list-disc">
+                              {typeof r === 'string' ? r : (<><strong>{r.rule}</strong> — {r.description}</>)}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
 
                   {/* Assistant Extra Metadata: Citations Shelf */}
                   {msg.role === 'assistant' && msg.citations && msg.citations.length > 0 && (

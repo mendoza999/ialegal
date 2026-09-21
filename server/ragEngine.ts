@@ -353,6 +353,12 @@ Reglas de respuesta:
     isWebGrounded: boolean;
     ragTypeUsed: 'hybrid' | 'vector' | 'graph' | 'web';
     confidenceScore: number;
+    corrections?: {
+      wasCorrected: boolean;
+      correctedAnswer: string;
+      appliedRules: string[];
+      explanation: string;
+    };
   }> {
     const {
       query,

@@ -42,6 +42,7 @@ export class ChatStore {
           isWebGrounded: m.isWebGrounded,
           ragTypeUsed: (m.ragTypeUsed as any) || undefined,
           confidenceScore: m.confidenceScore || undefined,
+          corrections: (m.corrections as any) || undefined,
         })),
       }));
     } catch (err) {
@@ -86,6 +87,7 @@ export class ChatStore {
           isWebGrounded: m.isWebGrounded,
           ragTypeUsed: (m.ragTypeUsed as any) || undefined,
           confidenceScore: m.confidenceScore || undefined,
+          corrections: (m.corrections as any) || undefined,
         })),
       };
     } catch (err) {
@@ -179,6 +181,7 @@ export class ChatStore {
         isWebGrounded: msg.isWebGrounded ?? false,
         ragTypeUsed: msg.ragTypeUsed || null,
         confidenceScore: msg.confidenceScore || null,
+        corrections: (msg.corrections as any) || null,
         timestamp: msg.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     });
@@ -199,9 +202,10 @@ export class ChatStore {
       graphNodes: (created.graphNodes as any) || [],
       graphLinks: (created.graphLinks as any) || [],
       searchGroundingSources: (created.searchGroundingSources as any) || [],
-      isWebGrounded: created.isWebGrounded,
+isWebGrounded: created.isWebGrounded,
       ragTypeUsed: (created.ragTypeUsed as any) || undefined,
       confidenceScore: created.confidenceScore || undefined,
+      corrections: (created.corrections as any) || undefined
     };
   }
 }

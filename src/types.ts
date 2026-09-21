@@ -270,6 +270,12 @@ export interface ChatMessage {
   ragTypeUsed?: 'hybrid' | 'vector' | 'graph' | 'web';
   confidenceScore?: number;
   executiveSummary?: string;
+  corrections?: {
+    wasCorrected: boolean;
+    correctedAnswer: string;
+    appliedRules: (string | { rule: string; description: string })[];
+    explanation: string;
+  };
 }
 
 export interface ChatSession {

@@ -103,6 +103,7 @@ model ChatMessage {
   isWebGrounded Boolean @default(false)
   ragTypeUsed String?
   confidenceScore Float?
+  corrections Json?
   timestamp String?
   createdAt DateTime @default(now())
   @@map("chat_messages")

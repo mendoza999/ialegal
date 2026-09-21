@@ -699,6 +699,114 @@ export class UsersStore {
     }
   }
 
+  /** Correr agente corrector tras respuesta LLM: si hay errores normativos,
+   *  se corre el LLM otra vez para corregir. Devuelve version para el usuario. */
+  public async reviewWithCorrectionAgent(params: {
+    rawAnswer: string;
+    chunks: any[];
+    query: string;
+    branchLabel: string;
+  }): Promise<{
+    wasCorrected: boolean;
+    correctedAnswer: string;
+    appliedRules: string[];
+    explanation: string;
+  } | null> {
+    const apiKey = process.env.GEMINI_API_KEY;
+    try {
+      let ai: any = null;
+      if (apiKey) {
+        try {
+          const { GoogleGenAI } = await import('@google/genai');
+          const mod: any = (GoogleGenAI as any).default || (GoogleGenAI as any);
+          ai = new mod({ apiKey: apiKey.trim() });
+        } catch (importErr) {
+          console.warn('[UsersStore] No se pudo importar @google/genai para agente corrector:', importErr);
+        }
+      }
+      if (!ai && process.env.GROQ_API_KEY) {
+        return null; // sin both keys activa, usa original
+      }
+      if (!ai) return null;
+
+      const chunkSummaries = (params.chunks || [])
+        .map(c => `[${c.docTitle || ''}] (${c.author || ''}, pág. ${c.page || '?'}): ${c.text?.slice(0, 300)}`)
+        .join('\n');
+
+      const prompt = `Actúa como revisor normativo peruano experto. Compará esta respuesta del modelo contra la normativa vigente del Estado Peruano:
+
+=== CONSULTA DEL USUARIO ===
+${params.query}
+
+=== CONTEXTO CARGADO EN LA BASE DE CONOCIMIENTOS ===
+${chunkSummaries || 'No hay contexto normativo cargado.'}
+
+=== RESPUESTA GENERADA POR EL MODELO ===
+${params.rawAnswer}
+
+=== INSTRUCCIONES DEL AGENTE CORRECTOR ===
+
+1. Revisá esta respuesta PARA DARLE LA RAZÓN AL MODELO:
+   - Contradicción con normativa vigente (Códigos, Leyes, RTF, STC, doctrina).
+   - Cita de norma inexistente, derogada o desactualizada.
+   - Afirmación falsa sobre plazos, requisitos, principios o excepciones.
+   - Confusión de ramas (ej. aplicar principio tributario a caso civil).
+
+2. Devuelve ESTRICTAMENTE este JSON en formato válido SIN comentarios:
+
+{
+  "wasCorrected": boolean,
+  "correctedAnswer": string,
+  "appliedRules": [ { "rule": "artículo/ley", "description": "breve explicación" } ],
+  "explanation": "Breve explicación de las correcciones aplicadas o 'ninguna corrección necesaria'."
+}
+
+3. Si wasCorrected=false, correctedAnswer DEBE ser la respuesta original SIN cambios.
+
+Revisá y corregí solo lo que esté realmente mal; no reescribas todo.
+${params.branchLabel ? `   (Rama: ${params.branchLabel})` : ''}`;
+
+      const response: any = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: { temperature: 0.1 }
+      });
+
+      const text = response?.text || '';
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.warn('[UsersStore] Agente corrector devolvió respuesta sin JSON válido. Usando original.');
+        return null;
+      }
+      try {
+        const review = JSON.parse(jsonMatch[0]);
+        if (!review || typeof review.wasCorrected !== 'boolean') return null;
+
+        if (!review.wasCorrected) {
+          return null; // nada que corregir
+        }
+        if (!review.correctedAnswer || typeof review.correctedAnswer !== 'string') {
+          console.warn('[UsersStore] Agente marcó wasCorrected=true pero no entregó correctedAnswer.');
+          return null;
+        }
+
+        return {
+          wasCorrected: true,
+          correctedAnswer: review.correctedAnswer,
+          appliedRules: Array.isArray(review.appliedRules) ? review.appliedRules : [],
+          explanation: review.explanation || 'Corrections normative peruana aplicadas por el agente.'
+        };
+      } catch (parseErr) {
+        console.warn('[UsersStore] Agente corrector devolvió JSON inválido:', parseErr);
+        return null;
+      }
+    } catch (err: any) {
+      console.error('[UsersStore] Error en agente corrector:', err?.message || err);
+      // Fail-safe: si el agente falla, usamos la respuesta original
+      return null;
+    }
+  }
+
   /**
    * Increment general query counter for a user (non-web RAG queries).
    */

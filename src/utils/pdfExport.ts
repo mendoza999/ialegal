@@ -13,6 +13,12 @@ export interface ExportExecutiveSummaryParams {
   isWebGrounded?: boolean;
   ragTypeUsed?: string;
   confidenceScore?: number;
+  corrections?: {
+    wasCorrected: boolean;
+    correctedAnswer: string;
+    appliedRules: (string | { rule: string; description: string })[];
+    explanation: string;
+  };
   date?: string;
 }
 
@@ -571,6 +577,69 @@ export function exportExecutiveSummaryPDF(params: ExportExecutiveSummaryParams) 
   }
 
   cursorY += 4;
+
+  // ==========================================
+  // SECTION 2.5: REVISIÓN NORMATIVA (if agente corrector)
+  // ==========================================
+  const corrections = params.corrections;
+  if (corrections && corrections.wasCorrected && corrections.explanation) {
+    ensureSpace(22);
+    drawSectionTitle('2.5', 'REVISIÓN NORMATIVA PERUANA (AGENTE CORRECTOR)');
+
+    const rules = corrections.appliedRules || [];
+    // Explanación
+    const expLines = doc.splitTextToSize(`Explanación: ${sanitizeTextForPDF(corrections.explanation) || 'Sin texto de corrección.'}`, contentWidth - 14);
+    const expHeight = expLines.length * 4.2 + 6;
+    ensureSpace(expHeight);
+
+    doc.setFillColor(...COLORS.goldLight);
+    doc.setDrawColor(...COLORS.goldPrimary);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(margin, cursorY, contentWidth, expHeight, 1.5, 1.5, 'FD');
+    doc.setFillColor(...COLORS.goldPrimary);
+    doc.rect(margin, cursorY, 2.5, expHeight, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...COLORS.slateDark);
+    doc.text('Explanación del Revisor Normativo:', margin + 5, cursorY + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(...COLORS.slateText);
+    for (let eIdx = 0; eIdx < expLines.length; eIdx++) {
+      doc.text(expLines[eIdx], margin + 5, cursorY + 9 + eIdx * 4.2);
+    }
+    cursorY += expHeight + 4;
+
+    // Reglas aplicadas
+    if (rules.length > 0) {
+      ensureSpace(rules.length * 5 + 8);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...COLORS.slateDark);
+      doc.text('Reglas / Normas Aplicadas:', margin + 2, cursorY);
+      cursorY += 5;
+
+      for (let rIdx = 0; rIdx < rules.length; rIdx++) {
+        const r = rules[rIdx];
+        const ruleText = typeof r === 'string' ? r : `${r.rule} — ${r.description}`;
+        const rLines = doc.splitTextToSize(`• ${sanitizeTextForPDF(ruleText)}`, contentWidth - 14);
+        ensureSpace(rLines.length * 4.2 + 1.5);
+        doc.setFillColor(...COLORS.goldPrimary);
+        doc.circle(margin + 3, cursorY + 1.2, 0.7, 'F');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...COLORS.slateText);
+        for (let rl = 0; rl < rLines.length; rl++) {
+          doc.text(rLines[rl], margin + 7, cursorY + 1.8 + rl * 4.2);
+          ensureSpace(4.2);
+        }
+        cursorY += rLines.length * 4.2 + 1.5;
+      }
+      cursorY += 2;
+    }
+  }
 
   // ==========================================
   // SECTION 3: CITAS BIBLIOGRÁFICAS & FUENTES
