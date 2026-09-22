@@ -730,8 +730,20 @@ export class UsersStore {
       if (!ai) return null;
 
       const chunkSummaries = (params.chunks || [])
-        .map(c => `[${c.docTitle || ''}] (${c.author || ''}, pág. ${c.page || '?'}): ${c.text?.slice(0, 300)}`)
+        .map(c => `[${c.docTitle || ''}] (${c.author || ''}, pág. ${c.page || '?'})${c.legalBasis ? ` [Base legal: ${c.legalBasis}]` : ''}: ${(c.quote || c.text || '').slice(0, 400)}`)
         .join('\n');
+
+      // Reglas verificadas de beneficios sociales: el corrector las usa como ground-truth
+      // cuando la consulta es laboral (2da línea de defensa si la 1ra generación falló).
+      const isLabor = (params.branchLabel || '').toLowerCase().includes('laboral');
+      const laborRules = isLabor ? `
+=== GROUND-TRUTH LABORAL VERIFICADO (prevalece sobre la respuesta generada) ===
+- CTS régimen general (TUO D.Leg. 650 / D.S. 001-97-TR): SIN límite anual ni máximo; fórmula (remuneración computable + 1/6 gratificación del semestre)/12 por mes completo; períodos may-oct (depósito nov) y nov-abr (depósito may); pago + carta de liberación en 48 HORAS tras el cese. D.S. 003-97-TR NO es norma de CTS.
+- Gratificaciones (Ley 27735): 1 remuneración por semestre completo (julio/diciembre); sin depósito mensual. Bonificación extraordinaria 9% = ahorro del aporte a EsSalud (Leyes 29351/30334), 6.75% si EPS; NADA que ver con vivienda. Ley 27715 NO es de gratificaciones privadas.
+- Vacaciones truncas (D.Leg. 713 / D.S. 012-92-TR): 1/12 por MES CALENDARIO COMPLETO; días sueltos solo si hay >=1 mes completo, a 1/30 de la dozava. Fórmula (días/360)x30 INCORRECTA.
+- MYPE (D.S. 013-2013-PRODUCE): pequeña = CTS 15 rem. diarias/año (tope 90), grats media rem., vacaciones 15 días; micro = sin CTS ni grats, vacaciones 15 días.
+- CITAS FICTICIAS PROHIBIDAS: "Casación 2925-2015-SC12", "Pleno Jurisdiccional 2018-00108", "Luis Nava Manual USMP 2022", "Art. 2.2.1 D.S. 003-97-TR" para CTS, "Exp. SC-2021-1234-Lima", "RTF 2020-0012-2020", "Guía SUNAT 2024" incompleta. Si la respuesta las cita, wasCorrected=true y elimínalas.
+` : '';
 
       const prompt = `Actúa como revisor normativo peruano experto. Compará esta respuesta del modelo contra la normativa vigente del Estado Peruano:
 
@@ -764,7 +776,7 @@ ${params.rawAnswer}
 3. Si wasCorrected=false, correctedAnswer DEBE ser la respuesta original SIN cambios.
 
 Revisá y corregí solo lo que esté realmente mal; no reescribas todo.
-${params.branchLabel ? `   (Rama: ${params.branchLabel})` : ''}`;
+${laborRules}${params.branchLabel ? `   (Rama: ${params.branchLabel})` : ''}`;
 
       const response: any = await ai.models.generateContent({
         model: 'gemini-2.5-flash',

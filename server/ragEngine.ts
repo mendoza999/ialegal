@@ -166,27 +166,41 @@ export class RAGEngine {
     const rName = (ramaNombre || '').toLowerCase();
 
 if (rId === '77f93f98-5612-4bba-b410-8e99010b213f' || rName.includes('laboral')) {
-      const benefitsBlock = `
-REGLAS ESPECÍFICAS PARA CÁLCULO DE BENEFICIOS SOCIALES (CTS, GRATIFICACIONES, VACACIONES):
+const benefitsBlock = `
+REGLAS VERIFICADAS PARA CÁLCULO DE BENEFICIOS SOCIALES (CTS, GRATIFICACIONES, VACACIONES).
+Estas reglas prevalecen sobre cualquier fragmento de libro que las contradiga:
 
-RÉGIMEN LABORAL GENERAL (D.L. 728 sobre la Relación de Trabajo Privada):
-- CTS: 1/12 (migración de la R-Mes en el depósito legal) por cada mes trabajado. Base computable (RMes referencial). Límite 15 R-Mes anuales por año completo, máximo 90 R-Mes acumulados.
-- GRATIFICACIONES LEGALES (Ley 27715): 1 R-Mes referencial por semestre cumplido (julio y diciembre). No hay aporte mensual; se deposita una sola vez al cumplimiento del semestre.
-- BONIFICACIÓN EXTRAORDINARIA (Ley 27715, Art. 3.4): si el trabajador no tiene vivienda propia, 9% de la R-Mes referencial también con dos pagos semestrales.
-- VACACIONES: 30 días calendario por cada año completo de servicio (Art. 24 D.L. 713). Gozadas o truncas según el cese.
+A. CTS — RÉGIMEN GENERAL (TUO del D.Leg. 650; norma operativa: D.S. 001-97-TR):
+- NO existe límite anual ni máximo acumulable de CTS en el régimen general.
+- Fórmula por mes completo: (remuneración computable + 1/6 de la gratificación percibida en el semestre) / 12.
+- Períodos de cómputo semestrales: mayo–octubre (se deposita en noviembre) y noviembre–abril (se deposita en mayo).
+- Al cese: pago + entrega de la carta de liberación de CTS en un plazo máximo de 48 HORAS (no 30 días).
+- El D.S. 003-97-TR es la Ley de Productividad y Competitividad Laboral: NO es la norma de la CTS. No lo cites como base de la CTS.
 
-RÉGIMEN ESPECIAL DE PEQUEÑA EMPRESA (MYPE, D.S. 013-2013-PRODUCE, Art. 8):
-- CTS: 15 RMes por año (1/12 mensual) → máximo 90 RMes.
-- GRATIFICACIONES: media R-Mes por semestre (2 x 0.5 RMes al año) en vez de 1 R-Mes.
-- VACACIONES: 15 días calendario por año (no 30).
+B. GRATIFICACIONES LEGALES — SECTOR PRIVADO (Ley 27735):
+- Una remuneración mensual completa por julio y otra por diciembre, cuando corresponde el semestre completo; proporcional por meses calendario completos si el semestre está incompleto.
+- NO existe obligación de "depositar mensualmente" las gratificaciones: se pagan al cumplirse cada semestre.
+- BONIFICACIÓN EXTRAORDINARIA (Leyes 29351 y 30334): 9% sobre cada gratificación = monto que el empleador deja de aportar a EsSalud al pagarla (6.75% si el trabajador está afiliado a una EPS). NO tiene relación alguna con vivienda propia.
+- La Ley 27715 regula nómina de FF.AA./PNP: NUNCA la cites para gratificaciones del sector privado.
 
-RÉGIMEN ESPECIAL DE MICROEMPRESA (Art. 11 D.L. 728; D.S. 013-2013-PRODUCE):
-- CTS: NO corresponde.
-- GRATIFICACIONES: NO corresponden las legales del régimen general.
-- VACACIONES: 15 días calendario.
+C. VACACIONES (D.Leg. 713; reglamento D.S. 012-92-TR):
+- Régimen general: 30 días calendario por cada año completo de servicios.
+- VACACIONES TRUNCAS: se computan por MESES CALENDARIO COMPLETOS efectivamente laborados (1/12 por mes). Los días que no completan un mes SOLO se pagan si el trabajador tiene al menos un mes completo en la empresa, a razón de 1/30 de la dozava.
+- La fórmula (días trabajados / 360) x 30 es INCORRECTA. No la uses.
+
+D. RÉGIMEN ESPECIAL MYPE (TUO D.S. 013-2013-PRODUCE; exige verificar inscripción en REMYPE):
+- Pequeña empresa: CTS de 15 remuneraciones DIARIAS por año (tope 90); gratificaciones de MEDIA remuneración cada una; vacaciones de 15 días.
+- Microempresa: NO corresponden CTS ni gratificaciones legales; vacaciones de 15 días.
+- NUNCA apliques las cuantías MYPE al régimen general ni viceversa.
+
+E. CITAS FICTICIAS DETECTADAS — PROHIBIDO CITARLAS (no existen o no respaldan lo afirmado):
+- "Casación Laboral N.º 2925-2015-SC12" / "Pleno Jurisdiccional Laboral N.º 2018-00108".
+- "Luis Nava, Manual de Derecho Laboral (USMP, 2022)".
+- "Exp. SC-2021-1234-Lima", "RTF 2020-0012-2020", "Guía SUNAT 2024" sin referencia completa.
+- "Bravo (2022) pág. 145" / "Medrano (2021) págs. 78-80" salvo que el fragmento del contexto los contenga literalmente.
 
 ANTES DE CALCULAR:
-1. Identifica EXPLÍCIDAMENTE el régimen del trabajador (general / pequeña MYPE / micro MYPE).
+1. Identifica EXPLÍCITAMENTE el régimen del trabajador (general / pequeña MYPE / micro MYPE).
 2. Solicita fecha de ingreso, fecha de cese, remuneración mensual, pagos ya realizados.
 3. Si falta alguna de esas variables, DECLARA el cálculo como REFERENCIAL y omite la cifra final exacta.
 
@@ -203,7 +217,7 @@ PROHIBICIONES:
 
 Tu ámbito de dominio abarca:
 - Régimen Laboral de la Actividad Privada (D.L. 728 / D.S. 003-97-TR), regímenes especiales (REMYPE, construcción civil, agrario) y sector público (D.L. 276, D.L. 1057 CAS, Ley 30057 Servir).
-- Beneficios sociales: Compensación por Tiempo de Servicios (CTS), Gratificaciones legales (Ley 27715), Vacaciones remuneradas (D.L. 713), Utilidades, Horas extras, Asignación familiar e indemnización por despido arbitrario/nulo.
+- Beneficios sociales: Compensación por Tiempo de Servicios - CTS (TUO D.Leg. 650 / D.S. 001-97-TR), Gratificaciones legales (Ley 27735 + bonificación extraordinaria Leyes 29351/30334), Vacaciones remuneradas (D.L. 713 / D.S. 012-92-TR), Utilidades, Horas extras, Asignación familiar e indemnización por despido arbitrario/nulo.
 - Seguridad y Salud en el Trabajo (Ley 29783) y fiscalizaciones de la SUNAFIL (actas de infracción, sanciones, procedimiento sancionador).
 - Derecho Colectivo del Trabajo: sindicatos, convenios colectivos, huelgas.
 - Jurisprudencia laboral: Casaciones Laborales de la Corte Suprema, Plenos Jurisdiccionales Laborales y sentencias del Tribunal Constitucional sobre estabilidad laboral.
