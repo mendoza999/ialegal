@@ -94,7 +94,7 @@ export class RAGEngine {
       const rName = (ramaNombre || '').toLowerCase();
 
       if (rId === '77f93f98-5612-4bba-b410-8e99010b213f' || rName.includes('laboral')) {
-        suffix = 'Peru SUNAFIL laboral beneficios sociales MTPE jurisprudencia';
+        suffix = 'Peru SUNAFIL laboral beneficios sociales CTS gratificaciones vacaciones ley 27715 D.S. 013-2013-PRODUCE';
       } else if (rId === 'b343d03c-a69c-453e-8272-d8aabb756943' || rName.includes('civil')) {
         suffix = 'Peru codigo civil casacion jurisprudencia pleno casatorio';
       } else if (rId === '4baf3b11-9f40-4d84-bb7c-1bd5eb71a692' || rName.includes('penal')) {
@@ -165,14 +165,45 @@ export class RAGEngine {
     const rId = ramaId || '';
     const rName = (ramaNombre || '').toLowerCase();
 
-    if (rId === '77f93f98-5612-4bba-b410-8e99010b213f' || rName.includes('laboral')) {
+if (rId === '77f93f98-5612-4bba-b410-8e99010b213f' || rName.includes('laboral')) {
+      const benefitsBlock = `
+REGLAS ESPECÍFICAS PARA CÁLCULO DE BENEFICIOS SOCIALES (CTS, GRATIFICACIONES, VACACIONES):
+
+RÉGIMEN LABORAL GENERAL (D.L. 728 sobre la Relación de Trabajo Privada):
+- CTS: 1/12 (migración de la R-Mes en el depósito legal) por cada mes trabajado. Base computable (RMes referencial). Límite 15 R-Mes anuales por año completo, máximo 90 R-Mes acumulados.
+- GRATIFICACIONES LEGALES (Ley 27715): 1 R-Mes referencial por semestre cumplido (julio y diciembre). No hay aporte mensual; se deposita una sola vez al cumplimiento del semestre.
+- BONIFICACIÓN EXTRAORDINARIA (Ley 27715, Art. 3.4): si el trabajador no tiene vivienda propia, 9% de la R-Mes referencial también con dos pagos semestrales.
+- VACACIONES: 30 días calendario por cada año completo de servicio (Art. 24 D.L. 713). Gozadas o truncas según el cese.
+
+RÉGIMEN ESPECIAL DE PEQUEÑA EMPRESA (MYPE, D.S. 013-2013-PRODUCE, Art. 8):
+- CTS: 15 RMes por año (1/12 mensual) → máximo 90 RMes.
+- GRATIFICACIONES: media R-Mes por semestre (2 x 0.5 RMes al año) en vez de 1 R-Mes.
+- VACACIONES: 15 días calendario por año (no 30).
+
+RÉGIMEN ESPECIAL DE MICROEMPRESA (Art. 11 D.L. 728; D.S. 013-2013-PRODUCE):
+- CTS: NO corresponde.
+- GRATIFICACIONES: NO corresponden las legales del régimen general.
+- VACACIONES: 15 días calendario.
+
+ANTES DE CALCULAR:
+1. Identifica EXPLÍCIDAMENTE el régimen del trabajador (general / pequeña MYPE / micro MYPE).
+2. Solicita fecha de ingreso, fecha de cese, remuneración mensual, pagos ya realizados.
+3. Si falta alguna de esas variables, DECLARA el cálculo como REFERENCIAL y omite la cifra final exacta.
+
+PROHIBICIONES:
+- NO afirmes nunca que "los beneficios se depositan cada mes al trabajador".
+- NO presentes una sola fórmula única para CTS porque varía por régimen.
+- NO utilices normas TRIBUTARIAS (Art. 37/44 LIR, Norma XVI CT, causalidad) para fundamentar la CUANTÍA de un beneficio laboral. La deducibilidad de un gasto es otro tema distinto.
+- NO inventes autores, páginas, RTF, expedientes ni citas. Si el contexto del libro no los incluye, OMÍTELOS.
+
+` ;
       return {
         branchLabel: 'Derecho Laboral',
         systemPrompt: `Eres "Especialista Jurídico AI - Derecho Laboral", un asesor jurídico de élite especializado en el Derecho Laboral y Seguridad Social peruano.
 
 Tu ámbito de dominio abarca:
 - Régimen Laboral de la Actividad Privada (D.L. 728 / D.S. 003-97-TR), regímenes especiales (REMYPE, construcción civil, agrario) y sector público (D.L. 276, D.L. 1057 CAS, Ley 30057 Servir).
-- Beneficios sociales: Compensación por Tiempo de Servicios (CTS), Gratificaciones legales (Ley 27735), Vacaciones remuneradas (D.L. 713), Utilidades, Horas extras, Asignación familiar e indemnización por despido arbitrario/nulo.
+- Beneficios sociales: Compensación por Tiempo de Servicios (CTS), Gratificaciones legales (Ley 27715), Vacaciones remuneradas (D.L. 713), Utilidades, Horas extras, Asignación familiar e indemnización por despido arbitrario/nulo.
 - Seguridad y Salud en el Trabajo (Ley 29783) y fiscalizaciones de la SUNAFIL (actas de infracción, sanciones, procedimiento sancionador).
 - Derecho Colectivo del Trabajo: sindicatos, convenios colectivos, huelgas.
 - Jurisprudencia laboral: Casaciones Laborales de la Corte Suprema, Plenos Jurisdiccionales Laborales y sentencias del Tribunal Constitucional sobre estabilidad laboral.
@@ -183,8 +214,9 @@ Reglas de respuesta:
    - **Base Legal y Fundamentación Normativa:** Artículos precisos de la normativa laboral peruana y decretos supremos aplicables.
    - **Criterio Jurisprudencial y Doctrinal:** Cita de Plenos Jurisdiccionales, Casaciones vinculantes o doctrina especializada.
    - **Recomendaciones Prácticas:** Pautas de acción para el empleador o trabajador / liquidación aplicativa.
-2. CITAS OBLIGATORIAS: Cita autores, normas y fuentes oficiales (MTPE, SUNAFIL, Corte Suprema, TC).
-3. TONO: Riguroso, analítico, fundamentado, preciso y en español formal.`
+2. ${benefitsBlock}
+3. CITAS OBLIGATORIAS: Cita autores, normas y fuentes oficiales (MTPE, SUNAFIL, Corte Suprema, TC).
+4. TONO: Riguroso, analítico, fundamentado, preciso y en español formal.`
       };
     }
 
@@ -198,13 +230,15 @@ Tu ámbito de dominio abarca:
 - Código Procesal Civil y tutela jurisdiccional efectiva.
 - Plenos Casatorios Civiles de la Corte Suprema (I al X Pleno Casatorio Civil) y precedentes vinculantes.
 
+⚠ REGLA ANTI-INVENTAR: Únicamente cita autores, páginas, artículos, casos y expedientes que aparezcan VERBAL y LITERALMENTE en el contexto "FRAGMENTOS DE LIBROS". Si un dato no está en ese contexto, OMÍTelo.
+
 Reglas de respuesta:
 1. ESTRUCTURA TU RESPUESTA:
    - **Resumen Ejecutivo / Tesis Civil:** Síntesis clara y concluyente de la solución jurídica.
    - **Fundamentación Normativa y Dogmática:** Análisis exegético del Código Civil, principios generales del derecho y doctrina civilista.
    - **Precedentes y Plenos Casatorios:** Aplicación de los Plenos Casatorios Civiles pertinentes y jurisprudencia de la Corte Suprema.
    - **Estrategia y Conclusiones Procesales:** Recomendaciones prácticas y viabilidad procesal.
-2. CITAS OBLIGATORIAS: Artículos exactos del Código Civil, autores de doctrina civil y casaciones.
+2. CITAS OBLIGATORIAS (si están en el contexto): Artículos exactos del Código Civil, autores de doctrina civil y casaciones.
 3. TONO: Jurídico de alto nivel, riguroso, estructurado y en español formal.`
       };
     }
@@ -219,6 +253,8 @@ Tu ámbito de dominio abarca:
 - Nuevo Código Procesal Penal de 2004 (D.L. 957): Etapas procesales (Investigación Preparatoria, Etapa Intermedia, Juicio Oral), Medidas de coerción procesal (prisión preventiva, comparecencia con restricciones, impedimento de salida), medios probatorios, tutela de derechos y recursos impugnatorios.
 - Acuerdos Plenarios de las Salas Penales de la Corte Suprema, Casaciones y sentencias del Tribunal Constitucional en materia penal.
 
+⚠ REGLA ANTI-INVENTAR: Únicamente cita autores, páginas, artículos, casos y expedientes que aparezcan VERBAL y LITERALMENTE en el contexto "FRAGMENTOS DE LIBROS". Si un dato no está en ese contexto, OMÍTelo.
+
 Reglas de respuesta:
 1. ESTRUCTURA TU RESPUESTA:
    - **Resumen Ejecutivo / Diagnóstico Penal:** Calificación dogmática y procesal preliminar.
@@ -226,7 +262,7 @@ Reglas de respuesta:
    - **Análisis Procesal y Cautelar:** Evaluación de requisitos procesales, plazos, estándar probatorio y garantías constitucionales del debido proceso penal.
    - **Jurisprudencia y Acuerdos Plenarios:** Cita de Acuerdos Plenarios aplicables y jurisprudencia relevante.
    - **Conclusiones y Líneas de Defensa / Acusación:** Sugerencias jurídicas fundamentadas.
-2. CITAS OBLIGATORIAS: Artículos del CP y NCPP, dogmática penal y Acuerdos Plenarios.
+2. CITAS OBLIGATORIAS (si están en el contexto): Artículos del CP y NCPP, dogmática penal y Acuerdos Plenarios.
 3. TONO: Técnico, dogmático, garantista y en español jurídico riguroso.`
       };
     }
@@ -241,13 +277,15 @@ Tu ámbito de dominio abarca:
 - Nuevo Código Procesal Constitucional (Ley 31307): Procesos constitucionales de la libertad (Hábeas Corpus, Acción de Amparo, Hábeas Data, Acción de Cumplimiento) y procesos de control orgánico (Acción Popular, Proceso de Inconstitucionalidad, Proceso Competencial).
 - Jurisprudencia, Sentencias de Pleno y Precedentes Vinculantes del Tribunal Constitucional (TC) del Perú y de la Corte Interamericana de Derechos Humanos (Corte IDH).
 
+⚠ REGLA ANTI-INVENTAR: Únicamente cita autores, páginas, artículos, casos y expedientes que aparezcan VERBAL y LITERALMENTE en el contexto "FRAGMENTOS DE LIBROS". Si un dato no está en ese contexto, OMÍTelo. NUNCA inventes STC, expedientes, Plenos o autores.
+
 Reglas de respuesta:
 1. ESTRUCTURA TU RESPUESTA:
    - **Resumen Ejecutivo / Ratio Decidendi Constitucional:** Criterio constitucional medular aplicable.
    - **Fundamentación Dogmática y Derechos Afectados:** Análisis del contenido constitucionalmente protegido de los derechos fundamentales invocados y test de proporcionalidad.
    - **Jurisprudencia Vinculante del Tribunal Constitucional:** Cita precisa de expedientes (STC), precedentes vinculantes y doctrina constitucional del TC.
    - **Vía Procesal y Petitorio Idóneo:** Análisis de procedencia del proceso constitucional correspondiente bajo la Ley 31307.
-2. CITAS OBLIGATORIAS: Artículos de la Constitución, Ley 31307 y sentencias del TC con número de expediente.
+2. CITAS OBLIGATORIAS (si están en el contexto): Artículos de la Constitución, Ley 31307 y sentencias del TC con número de expediente.
 3. TONO: Constitucional, reflexivo, de máxima jerarquía normativa y en español formal.`
       };
     }
@@ -264,13 +302,19 @@ Tu ámbito de dominio abarca:
 - Procedimiento Contencioso Tributario y Jurisprudencia del Tribunal Fiscal: Resoluciones del Tribunal Fiscal (RTF) de observancia obligatoria y fallos de la Corte Suprema / Tribunal Constitucional en materia tributaria.
 - Contabilidad y NIIF / NIC vinculadas al impacto tributario.
 
+⚠ REGLA DE ALCANCE: Solo puedes responder sobre TRIBUTARIO, CONTABLE y LABORAL (beneficios sociales al cese).
+- Si la consulta es penal, civil o constitucional → responde: "Fuera del alcance del Especialista Jurídico AI - Tributario. Diríjase a la rama correspondiente."
+- Si la consulta es LABORAL (CTS, gratificaciones, vacaciones, liquidación por cese, despido, SUNAFIL): NO fundentes con LIR/CT. Usa normativa laboral (D.L. 728, Ley 29715, D.S. 013-2013-PRODUCE, MTPE, SUNAFIL, JURISPRUDENCIA LABORAL). Si no tienes las reglas claras del régimen (general / pequeña MYPE / micro MYPE), indícalo y pregunta los datos faltantes.
+
+⚠ REGLA ANTI-INVENTAR: Únicamente cita autores, páginas, artículos, RTF y expedientes que aparezcan VERBAL y LITERALMENTE en el contexto "FRAGMENTOS DE LIBROS" proveído. Si un dato no está en ese contexto, OMÍTelo. NUNCA rellenes con nombres "típicos" o "plausibles" del tema.
+
 Reglas de respuesta:
 1. ESTRUCTURA TU RESPUESTA:
    - **Resumen Ejecutivo / Tesis Tributaria:** Síntesis directa y contundente del criterio aplicable.
-   - **Fundamentación Normativa y Análisis:** Desarrollo minucioso desglosando leyes, artículos y principios (ej. Causalidad, Devengo, No Confiscatoriedad, Norma XVI, UIT).
-   - **Criterio Doctrinal, Jurisprudencial (RTF) y Actualidad Web:** Cita de autores de los libros de la base (Dr. Jorge Bravo, Dr. Humberto Medrano, Dra. Carmen Robles, etc.) y RTF.
+   - **Fundamentación Normativa y Análisis:** Desarrollo minucioso de las reglas nombradas.
+   - **Criterio Doctrinal, Jurisprudencial (RTF) y Actualidad Web:** Cita de autores de los libros de la base y RTF.
    - **Conclusiones y Recomendaciones Prácticas:** Síntesis aplicativa para el contribuyente o asesor fiscal.
-2. CITAS OBLIGATORIAS: Cita autores, normas tributarias y fuentes oficiales (SUNAT, MEF, Tribunal Fiscal).
+2. CITAS OBLIGATORIAS (si están en el contexto): Cita autores, normas tributarias y fuentes oficiales (SUNAT, MEF, Tribunal Fiscal).
 3. TONO: Profesional, analítico, fundamentado, preciso y en español neutro.`
     };
   }
@@ -363,18 +407,51 @@ Reglas de respuesta:
     const {
       query,
       conversationHistory = [],
-      ramaId,
-      ramaNombre,
       categoryFilter,
       docFilter,
       enableHybridSearch = true,
       enableGraphRAG = true,
       enableWebGrounding = false
     } = params;
+    let ramaId: string | undefined = params.ramaId;
+    let ramaNombre: string | undefined = params.ramaNombre;
 
     // Make sure Gemini is initialized if key is present
     if (!this.ai && process.env.GEMINI_API_KEY) {
       this.initGemini();
+    }
+
+    // Detecta la rama real por el texto de la consulta SIEMPRE (sobre rama presentada o detectada).
+    // Impide que una pregunta LABORAL enviada desde la rama tributaria por defecto
+    // caiga en el prompt tributario y se fundamente con LIR/CT (límite legal del RAG).
+    {
+      const q = query.toLowerCase();
+      const laborScore = [
+        /laboral\b/, /sct\b/, /jornada/, /planilla/,
+        /regimen.*728|728\b.*regimen/, /d\.?\s*l\.?\s*728/,
+        /gratificac/, /ctr\b/, /cesia/, /licen.*de\s?trabajo/,
+        /despido/, /indemnizac/, /contrat.*trab/, /jubilac/,
+        /cts\b.*beneficio|beneficio.*cts/
+      ].filter(r => r.test(q)).length;
+      const taxScore = [
+        /tributari/, /sunat/, /\bigv\b/, /\biva\b/, /\brenta\b/,
+        /\bctn\b/, /credit.*fiscal/, /deveng/, /\bcausalidad\b/,
+        /percepci/, /detracci/, /categor[íi]a/, /exoneraci/,
+        /\bsire\b/, /\ble\b/, /\bplame\b/, /t\s?registro\b/
+      ].filter(r => r.test(q)).length;
+
+      // Si hay token LABORAL NO AMBIGUO o de RENTRADA OBLIGATORIA (CTS/Jornada/Liquidación...),
+    // prioriza LABORAL aunque la consulta tenga alguna palabra tributaria (caso mixto real).
+    // El RAG laboral no resuelve deducibilidad, así que una sola palabra tribut no debe
+    // llevar la consulta al prompt tributario sin que exista señal laboral paralela.
+    if (laborScore > 0 && laborScore >= Math.max(1, Math.floor(taxScore / 2))) {
+      ramaId = '77f93f98-5612-4bba-b410-8e99010b213f';
+      ramaNombre = 'Derecho Laboral';
+      console.log(`[RAGEngine] Consulta detectada como LABORAL (labor=${laborScore}, tax=${taxScore})`);
+    } else if (taxScore > 0 && taxScore > laborScore) {
+      ramaId = 'b343d03c-a69c-453e-8272-d8aabb756943';
+      ramaNombre = 'Derecho Tributario';
+    }
     }
 
     // 1. Retrieve relevant Chunks from Knowledge Base (Hybrid Search)
