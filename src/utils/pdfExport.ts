@@ -48,6 +48,11 @@ const COLORS = {
 export function sanitizeTextForPDF(text: string): string {
   if (!text) return '';
   return text
+    // 0. Símbolos/emoji sin glifo en WinAnsi (jsPDF helvetica): mapear a ASCII
+    // (antes "⚠️" salía como "& þ" y "✓" como "'")
+    .replace(/[⚠️]/g, '[!] ')
+    .replace(/[✓✔]/g, 'OK ')
+    .replace(/[❌✗]/g, 'X ')
     // 1. Replace ALL non-breaking spaces and exotic Unicode whitespace with standard ASCII space
     .replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\uFEFF]/g, ' ')
     // 2. Replace smart/curly quotes with standard quotes

@@ -94,7 +94,7 @@ export class RAGEngine {
       const rName = (ramaNombre || '').toLowerCase();
 
       if (rId === '77f93f98-5612-4bba-b410-8e99010b213f' || rName.includes('laboral')) {
-        suffix = 'Peru SUNAFIL laboral beneficios sociales CTS gratificaciones vacaciones ley 27715 D.S. 013-2013-PRODUCE';
+        suffix = 'Peru SUNAFIL laboral beneficios sociales CTS gratificaciones vacaciones ley 27735 D.S. 013-2013-PRODUCE';
       } else if (rId === 'b343d03c-a69c-453e-8272-d8aabb756943' || rName.includes('civil')) {
         suffix = 'Peru codigo civil casacion jurisprudencia pleno casatorio';
       } else if (rId === '4baf3b11-9f40-4d84-bb7c-1bd5eb71a692' || rName.includes('penal')) {
@@ -438,34 +438,35 @@ Reglas de respuesta:
     // Detecta la rama real por el texto de la consulta SIEMPRE (sobre rama presentada o detectada).
     // Impide que una pregunta LABORAL enviada desde la rama tributaria por defecto
     // caiga en el prompt tributario y se fundamente con LIR/CT (límite legal del RAG).
-    {
-      const q = query.toLowerCase();
+{
+      // Normaliza tildes: "régimen"→"regimen", "crédito"→"credito" (los patrones son ASCII).
+      // Sin esto, /credit.*fiscal/ nunca matchea "crédito fiscal" y el score tributario queda ciego.
+      const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const laborScore = [
-        /laboral\b/, /sct\b/, /jornada/, /planilla/,
+        /laboral\b/, /jornada/, /planilla/,
         /regimen.*728|728\b.*regimen/, /d\.?\s*l\.?\s*728/,
-        /gratificac/, /ctr\b/, /cesia/, /licen.*de\s?trabajo/,
-        /despido/, /indemnizac/, /contrat.*trab/, /jubilac/,
-        /cts\b.*beneficio|beneficio.*cts/
+        /gratificac/, /despido/, /indemnizac/, /contrat.*trab/, /jubilac/,
+        /\bcts\b/, /cts\b.*beneficio|beneficio.*cts/, /licen.*de\s?trabajo/
       ].filter(r => r.test(q)).length;
       const taxScore = [
         /tributari/, /sunat/, /\bigv\b/, /\biva\b/, /\brenta\b/,
-        /\bctn\b/, /credit.*fiscal/, /deveng/, /\bcausalidad\b/,
-        /percepci/, /detracci/, /categor[íi]a/, /exoneraci/,
-        /\bsire\b/, /\ble\b/, /\bplame\b/, /t\s?registro\b/
+        /credito.*fiscal/, /factura/, /comprobante/, /bancariz/, /pdt\b/,
+        /ley\s*28194/, /deveng/, /causalidad/,
+        /percepci/, /detracci/, /categori/, /exoneraci/, /inafect/,
+        /\bsire\b/, /\bplame\b/, /registro.*compras/
       ].filter(r => r.test(q)).length;
 
-      // Si hay token LABORAL NO AMBIGUO o de RENTRADA OBLIGATORIA (CTS/Jornada/Liquidación...),
-    // prioriza LABORAL aunque la consulta tenga alguna palabra tributaria (caso mixto real).
-    // El RAG laboral no resuelve deducibilidad, así que una sola palabra tribut no debe
-    // llevar la consulta al prompt tributario sin que exista señal laboral paralela.
-    if (laborScore > 0 && laborScore >= Math.max(1, Math.floor(taxScore / 2))) {
-      ramaId = '77f93f98-5612-4bba-b410-8e99010b213f';
-      ramaNombre = 'Derecho Laboral';
-      console.log(`[RAGEngine] Consulta detectada como LABORAL (labor=${laborScore}, tax=${taxScore})`);
-    } else if (taxScore > 0 && taxScore > laborScore) {
-      ramaId = 'b343d03c-a69c-453e-8272-d8aabb756943';
-      ramaNombre = 'Derecho Tributario';
-    }
+      // Umbral ESTRICTO: solo se sobrescribe la rama si una señal gana con claridad.
+      // Empate o silencio → se respeta la rama que eligió el usuario (comportamiento previo).
+      // (Lección: /ctr\b/ matcheaba "electrónica" y un umbral flojo declaró LABORAL a una pregunta de IGV.)
+      if (laborScore > taxScore && laborScore > 0) {
+        ramaId = '77f93f98-5612-4bba-b410-8e99010b213f';
+        ramaNombre = 'Derecho Laboral';
+        console.log(`[RAGEngine] Consulta detectada como LABORAL (labor=${laborScore}, tax=${taxScore})`);
+      } else if (taxScore > laborScore && taxScore > 0) {
+        ramaId = 'b343d03c-a69c-453e-8272-d8aabb756943';
+        ramaNombre = 'Derecho Tributario';
+      }
     }
 
     // 1. Retrieve relevant Chunks from Knowledge Base (Hybrid Search)
@@ -566,7 +567,7 @@ Por favor, elabora tu respuesta siguiendo las reglas jurídicas y fundamentació
           });
 
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout esperando respuesta de Gemini (429/latencia)')), 3500)
+            setTimeout(() => reject(new Error('Timeout esperando respuesta de Gemini (429/latencia)')), 20000)
           );
 
           const response: any = await Promise.race([geminiPromise, timeoutPromise]);
