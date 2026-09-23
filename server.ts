@@ -362,6 +362,12 @@ El cupo de búsquedas locales se reiniciará automáticamente a las 00:00 hrs de
         await usersStore.incrementLocalQueryUsage(userId);
       }
 
+      // Disclaimer legal obligatorio al final de toda respuesta de análisis
+      const DISCLAIMER = '\n\n---\n\n> ⚠️ **Nota importante:** Esta herramienta genera análisis complementarios basados en modelos de IA. Las respuestas constituyen un insumo de apoyo y no deben tomarse en forma textual ni reemplazar la validación y el criterio del profesional a cargo.';
+      if (result.answer && !result.answer.includes('no deben tomarse en forma textual')) {
+        result.answer += DISCLAIMER;
+      }
+
       // Save assistant response message to PostgreSQL
       let savedAssistantMsg = null;
       if (activeSessionId) {
