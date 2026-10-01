@@ -9,6 +9,7 @@ import { TaxDocument, DocumentChunk, GraphNode, GraphLink } from './src/types';
 import { usersStore, UNLIMITED_QUERIES } from './server/usersStore';
 import { chatStore } from './server/chatStore';
 import { prisma } from './server/db';
+import * as legislationStore from './server/legislationStore';
 
 const DOCUMENTS_DIR = path.join(process.cwd(), 'server', 'documents');
 if (!fs.existsSync(DOCUMENTS_DIR)) {
@@ -171,6 +172,46 @@ async function startServer() {
       res.json({ success: true, ...usage });
     } catch (e: any) {
       res.json({ success: true, count: 0, limit: 2, remaining: 2 });
+    }
+  });
+
+  // 0c. Buscador estructurado de normativa (2da BD html_docs):
+  // ?q=texto & fecha_inicial=YYYY-MM-DD & fecha_final=YYYY-MM-DD & tipo=X & limit & offset
+  // Solo fecha_inicial → normas de ESE DÍA; ambas → rango inclusivo.
+  app.get('/api/legislation/search', async (req, res) => {
+    try {
+      const q = typeof req.query.q === 'string' ? req.query.q : undefined;
+      const fechaInicial = typeof req.query.fecha_inicial === 'string' ? req.query.fecha_inicial : undefined;
+      const fechaFinal = typeof req.query.fecha_final === 'string' ? req.query.fecha_final : undefined;
+      const tipo = typeof req.query.tipo === 'string' ? req.query.tipo : undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+      const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
+
+      const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+      if ((fechaInicial && !dateRe.test(fechaInicial)) || (fechaFinal && !dateRe.test(fechaFinal))) {
+        return res.status(400).json({ error: 'Fechas con formato YYYY-MM-DD.' });
+      }
+      const result = await legislationStore.searchLegislationStructured({
+        q, fechaInicial, fechaFinal, tipo,
+        limit: Number.isFinite(limit) ? limit : 20,
+        offset: Number.isFinite(offset) ? offset : 0,
+      });
+      res.json({ success: true, ...result });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || 'Error buscando normativa.' });
+    }
+  });
+
+  // 0d. Detalle de una norma (content HTML completo para el modal del tab Normativa)
+  app.get('/api/legislation/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID inválido.' });
+      const doc = await legislationStore.getLegislationById(id);
+      if (!doc) return res.status(404).json({ error: 'Norma no encontrada.' });
+      res.json({ success: true, doc });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || 'Error obteniendo la norma.' });
     }
   });
 

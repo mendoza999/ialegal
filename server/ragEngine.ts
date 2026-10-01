@@ -2,17 +2,13 @@ import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { knowledgeBase } from './knowledgeBase';
 import { neo4jService } from './neo4jService';
+import { searchLegislationSemantic, LegislationDoc } from './legislationStore';
 import { Citation, DocumentChunk, GraphNode, GraphLink, SearchGroundingSource } from '../src/types';
 
 export class RAGEngine {
   private ai: GoogleGenAI | null = null;
   private availableModels = ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
-  private groqModels = [
-    'openai/gpt-oss-120b',
-    'groq/compound',
-    'openai/gpt-oss-20b',
-    'qwen/qwen3.6-27b'
-  ];
+  private groqModels = ['openai/gpt-oss-120b', 'groq/compound', 'openai/gpt-oss-20b', 'qwen/qwen3.6-27b'];
 
   constructor() {
     this.initGemini();
@@ -164,9 +160,9 @@ export class RAGEngine {
   public getRamaPromptConfig(ramaId?: string, ramaNombre?: string): { systemPrompt: string; branchLabel: string } {
     const rId = ramaId || '';
     const rName = (ramaNombre || '').toLowerCase();
-
-if (rId === '77f93f98-5612-4bba-b410-8e99010b213f' || rName.includes('laboral')) {
-const benefitsBlock = `
+    console.log("get rama: ", rId, rName);
+    if (rId === '77f93f98-5612-4bba-b410-8e99010b213f' || rName.includes('laboral')) {
+      const benefitsBlock = `
 REGLAS VERIFICADAS PARA CÁLCULO DE BENEFICIOS SOCIALES (CTS, GRATIFICACIONES, VACACIONES).
 Estas reglas prevalecen sobre cualquier fragmento de libro que las contradiga:
 
@@ -316,11 +312,7 @@ Tu ámbito de dominio abarca:
 - Procedimiento Contencioso Tributario y Jurisprudencia del Tribunal Fiscal: Resoluciones del Tribunal Fiscal (RTF) de observancia obligatoria y fallos de la Corte Suprema / Tribunal Constitucional en materia tributaria.
 - Contabilidad y NIIF / NIC vinculadas al impacto tributario.
 
-⚠ REGLA DE ALCANCE: Solo puedes responder sobre TRIBUTARIO, CONTABLE y LABORAL (beneficios sociales al cese).
-- Si la consulta es penal, civil o constitucional → responde: "Fuera del alcance del Especialista Jurídico AI - Tributario. Diríjase a la rama correspondiente."
-- Si la consulta es LABORAL (CTS, gratificaciones, vacaciones, liquidación por cese, despido, SUNAFIL): NO fundentes con LIR/CT. Usa normativa laboral (D.L. 728, Ley 29715, D.S. 013-2013-PRODUCE, MTPE, SUNAFIL, JURISPRUDENCIA LABORAL). Si no tienes las reglas claras del régimen (general / pequeña MYPE / micro MYPE), indícalo y pregunta los datos faltantes.
-
-⚠ REGLA ANTI-INVENTAR: Únicamente cita autores, páginas, artículos, RTF y expedientes que aparezcan VERBAL y LITERALMENTE en el contexto "FRAGMENTOS DE LIBROS" proveído. Si un dato no está en ese contexto, OMÍTelo. NUNCA rellenes con nombres "típicos" o "plausibles" del tema.
+⚠ REGLA DE ALCANCE: Únicamente cita autores, páginas, artículos, casos y expedientes que aparezcan VERBAL y LITERALMENTE en el contexto "FRAGMENTOS DE LIBROS". Si un dato no está en ese contexto, OMÍTelo. NUNCA inventes STC, expedientes, Plenos o autores.
 
 Reglas de respuesta:
 1. ESTRUCTURA TU RESPUESTA:
@@ -329,7 +321,7 @@ Reglas de respuesta:
    - **Criterio Doctrinal, Jurisprudencial (RTF) y Actualidad Web:** Cita de autores de los libros de la base y RTF.
    - **Conclusiones y Recomendaciones Prácticas:** Síntesis aplicativa para el contribuyente o asesor fiscal.
 2. CITAS OBLIGATORIAS (si están en el contexto): Cita autores, normas tributarias y fuentes oficiales (SUNAT, MEF, Tribunal Fiscal).
-3. TONO: Profesional, analítico, fundamentado, preciso y en español neutro.`
+3. TONO: Profesional, analítico, fundamentado, preciso, reflexivo, de máxima jerarquía normativa y en español formal.`
     };
   }
 
@@ -438,7 +430,7 @@ Reglas de respuesta:
     // Detecta la rama real por el texto de la consulta SIEMPRE (sobre rama presentada o detectada).
     // Impide que una pregunta LABORAL enviada desde la rama tributaria por defecto
     // caiga en el prompt tributario y se fundamente con LIR/CT (límite legal del RAG).
-{
+    {
       // Normaliza tildes: "régimen"→"regimen", "crédito"→"credito" (los patrones son ASCII).
       // Sin esto, /credit.*fiscal/ nunca matchea "crédito fiscal" y el score tributario queda ciego.
       const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -472,6 +464,10 @@ Reglas de respuesta:
     // 1. Retrieve relevant Chunks from Knowledge Base (Hybrid Search)
     const matchedChunks = knowledgeBase.searchChunks(query, 6, categoryFilter, docFilter, ramaId);
 
+    // 1b. Normativa vigente (2da BD html_docs): se lanza en paralelo al web grounding.
+    // Si la BD no está configurada o falla, devuelve [] y el RAG sigue solo con doctrina.
+    const legislationPromise: Promise<LegislationDoc[]> = searchLegislationSemantic(query, 4);
+
     // 2. Extract keywords for GraphRAG
     const queryTokens = query
       .replace(/[¿?¡!.,;:]/g, '')
@@ -495,6 +491,26 @@ Reglas de respuesta:
           webContextText += `[FUENTE WEB #${idx + 1}]: ${src.title}\nURL: ${src.uri}\nExtracto: ${src.snippet}\n\n`;
         });
       }
+    }
+
+    // 4b. Resolver normativa vigente (corrió en paralelo al web grounding)
+    let legislationDocs: LegislationDoc[] = [];
+    try {
+      legislationDocs = await legislationPromise;
+    } catch {
+      legislationDocs = [];
+    }
+    let legislationContext = '';
+    if (legislationDocs.length > 0) {
+      legislationContext += '\n=== NORMATIVA VIGENTE (LEGISLACIÓN - PRIORIZA ESTA FUENTE ANTE CONTRADICCIÓN CON DOCTRINA) ===\n';
+      legislationDocs.forEach((doc, idx) => {
+        legislationContext += `[NORMA #${idx + 1}]\n`;
+        legislationContext += `Título: ${doc.title}\n`;
+        legislationContext += `Tipo: ${doc.tipoDeNorma}\n`;
+        legislationContext += `Publicada: ${doc.fechaPublicacion || 's/f'}\n`;
+        legislationContext += `Sumilla/Extracto: ${doc.excerpt}\n\n`;
+      });
+      legislationContext += 'INSTRUCCIÓN: ante contradicción entre doctrina y estas normas, prevalece la norma vigente de mayor fecha de publicación.\n';
     }
 
     // 5. Build Dynamic Prompt according to Selected Rama
@@ -533,7 +549,26 @@ Reglas de respuesta:
       fileUrl: `/api/documents/view/${chunk.docId}`
     }));
 
+    // 7b. Citas de normativa vigente (origen legislación, badge propio en UI/PDF)
+    const legislationCitations: Citation[] = legislationDocs.map(doc => ({
+      id: `leg-${doc.id}`,
+      docId: `leg-${doc.id}`,
+      docTitle: doc.title,
+      author: doc.tipoDeNorma || 'Legislación',
+      page: doc.fechaPublicacion ? parseInt(doc.fechaPublicacion.slice(0, 4), 10) || 0 : 0,
+      chapter: typeof doc.tipoNorma === 'string' ? doc.tipoNorma : (doc.tipoNorma?.nombre || doc.tipoNorma?.tipo || 'Norma'),
+      quote: doc.excerpt.slice(0, 180) + '...',
+      relevanceScore: 98,
+      legalBasis: `${doc.tipoDeNorma || 'Legislación'} · pub. ${doc.fechaPublicacion || 's/f'}`,
+      fileUrl: `/api/legislation/${doc.id}`,
+      source: 'legislacion' as const,
+      fechaPublicacion: doc.fechaPublicacion || undefined,
+      tipoNorma: typeof doc.tipoNorma === 'string' ? doc.tipoNorma : undefined
+    }));
+    citations.push(...legislationCitations);
+
     const fullPrompt = `${documentContext}
+${legislationContext}
 ${graphContext.contextText}
 ${webContextText}
 

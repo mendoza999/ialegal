@@ -32,8 +32,8 @@ import { Neo4jConnectionConfig, RamaDerecho } from '../types';
 import { ActiveUsersModal } from './ActiveUsersModal';
 
 interface NavbarProps {
-  currentTab: 'chat' | 'graph' | 'library' | 'admin';
-  setCurrentTab: (tab: 'chat' | 'graph' | 'library' | 'admin') => void;
+  currentTab: 'chat' | 'graph' | 'library' | 'legislation' | 'admin';
+  setCurrentTab: (tab: 'chat' | 'graph' | 'library' | 'legislation' | 'admin') => void;
   neo4jConfig?: Neo4jConnectionConfig;
 }
 
@@ -213,6 +213,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <BookOpen className="h-3.5 w-3.5" />
             <span>Biblioteca (PDFs)</span>
+          </button>
+
+          <button
+            id="nav-tab-legislation"
+            onClick={() => setCurrentTab('legislation')}
+            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentTab === 'legislation'
+              ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+          >
+            <Scale className="h-3.5 w-3.5" />
+            <span>Normativa</span>
           </button>
 
           {isAdmin && (
@@ -579,6 +591,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <BookOpen className="h-3.5 w-3.5" />
           <span>Libros</span>
+        </button>
+        <button
+          onClick={() => setCurrentTab('legislation')}
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-lg ${currentTab === 'legislation' ? 'font-bold text-emerald-600 dark:text-emerald-400' : 'text-slate-500'
+            }`}
+        >
+          <Scale className="h-3.5 w-3.5" />
+          <span>Normas</span>
         </button>
         {isAdmin && (
           <button

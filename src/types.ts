@@ -249,6 +249,9 @@ export interface Citation {
   fileUrl?: string;
   fileName?: string;
   conceptMatched?: string;
+  source?: 'doctrina' | 'legislacion';
+  fechaPublicacion?: string;
+  tipoNorma?: string;
 }
 
 export interface SearchGroundingSource {

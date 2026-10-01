@@ -8,13 +8,14 @@ import { Navbar } from './components/Navbar';
 import { ChatView } from './components/ChatView';
 import { GraphVisualizer } from './components/GraphVisualizer';
 import { DocumentLibrary } from './components/DocumentLibrary';
+import { LegislationLibrary } from './components/LegislationLibrary';
 import { AdminPanel } from './components/AdminPanel';
 import { CitationModal } from './components/CitationModal';
 import { LoginScreen } from './components/LoginScreen';
 import { Citation, TaxDocument } from './types';
 
 function MainAppContent() {
-  const [currentTab, setCurrentTab] = useState<'chat' | 'graph' | 'library' | 'admin'>('chat');
+  const [currentTab, setCurrentTab] = useState<'chat' | 'graph' | 'library' | 'legislation' | 'admin'>('chat');
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null);
   const [selectedDocForChat, setSelectedDocForChat] = useState<TaxDocument | null>(null);
   const [showPromo, setShowPromo] = useState(true);
@@ -72,6 +73,10 @@ function MainAppContent() {
 
         {currentTab === 'admin' && (
           <AdminPanel />
+        )}
+
+        {currentTab === 'legislation' && (
+          <LegislationLibrary />
         )}
       </main>
 
