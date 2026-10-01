@@ -82,7 +82,7 @@ export const LegislationLibrary: React.FC = () => {
         <Scale className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
         <h2 className="text-lg font-bold">Normativa Vigente</h2>
         <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold">
-          html_docs
+          Normas Legales
         </span>
       </div>
 
@@ -120,14 +120,15 @@ export const LegislationLibrary: React.FC = () => {
           </label>
           <label className="space-y-1">
             <span className="text-[11px] font-bold uppercase text-slate-500">Tipo de norma</span>
-            <input
-              type="text"
+            <select
               value={tipo}
               onChange={e => setTipo(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') runSearch(0); }}
-              placeholder="Ej. Legislacion"
               className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
-            />
+            >
+              <option value="">Todas</option>
+              <option value="Jurisprudencia">Jurisprudencia</option>
+              <option value="Legislacion">Legislacion</option>
+            </select>
           </label>
         </div>
         <div className="flex items-center space-x-2">

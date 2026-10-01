@@ -224,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
           >
             <Scale className="h-3.5 w-3.5" />
-            <span>Normativa</span>
+            <span>Normas Legales</span>
           </button>
 
           {isAdmin && (
@@ -259,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
               <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
               <span className="hidden sm:inline">
-                {activeUsersCount} {activeUsersCount === 1 ? 'Active user' : 'active users'}
+                {activeUsersCount} {activeUsersCount === 1 ? 'User' : 'Users'}
               </span>
               <span className="sm:hidden font-bold">
                 {activeUsersCount}
