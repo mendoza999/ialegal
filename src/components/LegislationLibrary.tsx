@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, CalendarDays, FileText, ChevronLeft, ChevronRight, X, Scale, Tag } from 'lucide-react';
+import { useMemo } from 'react';
+import DOMPurify from 'dompurify';
 
 interface LegislationResult {
   id: number;
@@ -26,6 +28,39 @@ export const LegislationLibrary: React.FC = () => {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [detail, setDetail] = useState<any | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+
+  function toSafeHtml(raw?: string) {
+    if (!raw) return '';
+    let html = raw;
+
+    // 1) Si viene escapado (&lt;p&gt;), lo decodifica
+    if (/&lt;\/?[a-z][\s\S]*?&gt;/i.test(html)) {
+      const t = document.createElement('textarea');
+      t.innerHTML = html;
+      html = t.value;
+    }
+
+    // 2) Texto plano → HTML con estructura legal: encabezados (Artículo, Título,
+    // Capítulo, Sección, Disposición…), párrafos y saltos de línea
+    if (!/<\/?[a-z][\s\S]*>/i.test(html)) {
+      html = html
+        .split(/\n{2,}/)
+        .map(block => {
+          const lines = block.split(/\n/).map(l => l.trim()).filter(Boolean);
+          return lines.map(line => {
+            if (/^(art[íi]culo\s+\S+|cap[íi]tulo\s+\S+|t[íi]tulo\s+\S+|secci[óo]n\s+\S+|disposici[óo]n\s+\S+|anexo\s*\S*|considerando|por cuanto|decreta|resuelve)\b/i.test(line)) {
+              return `<h4>${line}</h4>`;
+            }
+            return `<p>${line}</p>`;
+          }).join('');
+        })
+        .join('');
+    }
+
+    // 3) Limpia scripts y atributos peligrosos
+    return DOMPurify.sanitize(html);
+  }
+
 
   const runSearch = useCallback(async (nextOffset = 0) => {
     setLoading(true);
@@ -75,6 +110,7 @@ export const LegislationLibrary: React.FC = () => {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
+  const contentHtml = useMemo(() => toSafeHtml(detail?.content), [detail?.content]);
 
   return (
     <div className="flex-1 p-3 sm:p-6 max-w-7xl mx-auto w-full space-y-4">
@@ -248,10 +284,10 @@ export const LegislationLibrary: React.FC = () => {
                   {detail.sumilla}
                 </p>
               )}
-              {detail?.content && (
+              {contentHtml && (
                 <div
-                  className="prose prose-sm dark:prose-invert max-w-none text-xs sm:text-sm"
-                  dangerouslySetInnerHTML={{ __html: detail.content }}
+                  className="leg-content max-w-none text-xs sm:text-sm text-slate-800 dark:text-slate-200"
+                  dangerouslySetInnerHTML={{ __html: contentHtml }}
                 />
               )}
             </div>
