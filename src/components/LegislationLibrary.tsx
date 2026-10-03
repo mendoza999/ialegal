@@ -15,6 +15,12 @@ interface LegislationResult {
 
 const PAGE_SIZE = 20;
 
+// El título a veces trae ruta de archivo ("20261002\\RESOLUCIÓN...html"): mostrar limpio
+function cleanTitle(t?: string | null): string {
+  if (!t) return '';
+  return t.replace(/\\/g, ' · ').replace(/\.html?$/i, '').trim();
+}
+
 export const LegislationLibrary: React.FC = () => {
   const [q, setQ] = useState('');
   const [fechaInicial, setFechaInicial] = useState('');
@@ -40,18 +46,28 @@ export const LegislationLibrary: React.FC = () => {
       html = t.value;
     }
 
-    // 2) Texto plano → HTML con estructura legal: encabezados (Artículo, Título,
-    // Capítulo, Sección, Disposición…), párrafos y saltos de línea
+    // 2) Texto plano → HTML con estructura legal. Muchas normas vienen en UN SOLO
+    // bloque sin saltos de línea, así que además de partir por líneas se segmenta
+    // por marcadores inline: VISTOS, CONSIDERANDO, SE RESUELVE, Artículo N.º, etc.
     if (!/<\/?[a-z][\s\S]*>/i.test(html)) {
+      const MARKER = /(\bVISTOS\s*:|\bCONSIDERANDO\s*:|\bSE\s+RESUELVE\s*:?|\bSE\s+ACUERDA\s*:?|\bDECRETA\s*:|\bArt[íi]culo\s+\d+[°ºoª]?\s*(?:[.·\-–:])?|\bReg[íi]strese,\s*comun[íi]quese[^.]*\.?)/gi;
+      const HEADING = /^(VISTOS|CONSIDERANDO|SE\s+RESUELVE|SE\s+ACUERDA|DECRETA|Art[íi]culo)/i;
+      const LINE_HEAD = /^(art[íi]culo\s+\S+|cap[íi]tulo\s+\S+|t[íi]tulo\s+\S+|secci[óo]n\s+\S+|disposici[óo]n\s+\S+|anexo\s*\S*|considerando|por cuanto|decreta|resuelve)\b/i;
+
       html = html
         .split(/\n{2,}/)
         .map(block => {
-          const lines = block.split(/\n/).map(l => l.trim()).filter(Boolean);
-          return lines.map(line => {
-            if (/^(art[íi]culo\s+\S+|cap[íi]tulo\s+\S+|t[íi]tulo\s+\S+|secci[óo]n\s+\S+|disposici[óo]n\s+\S+|anexo\s*\S*|considerando|por cuanto|decreta|resuelve)\b/i.test(line)) {
-              return `<h4>${line}</h4>`;
-            }
-            return `<p>${line}</p>`;
+          // 2a) líneas con encabezado propio
+          const byLines = block.split(/\n/).map(l => l.trim()).filter(Boolean);
+          const useLines = byLines.length > 1 ? byLines : [block.trim()];
+          return useLines.map(piece => {
+            if (LINE_HEAD.test(piece) && piece.length < 220) return `<h4>${piece}</h4>`;
+            // 2b) segmentar marcadores dentro del párrafo
+            const parts = piece.split(MARKER).map(s => (s || '').trim()).filter(Boolean);
+            if (parts.length <= 1) return `<p>${piece}</p>`;
+            return parts.map(part =>
+              HEADING.test(part) ? `<h4>${part}</h4>` : `<p>${part.replace(/^[\s.\-–:;]+/, '')}</p>`
+            ).join('');
           }).join('');
         })
         .join('');
@@ -202,7 +218,7 @@ export const LegislationLibrary: React.FC = () => {
             className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-600 cursor-pointer transition-all shadow-2xs"
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="text-sm font-bold leading-snug">{r.title}</p>
+              <p className="text-sm font-bold leading-snug">{cleanTitle(r.title)}</p>
               {r.fechaPublicacion && (
                 <span className="inline-flex items-center space-x-1 text-[10px] font-mono px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold whitespace-nowrap shrink-0">
                   <CalendarDays className="h-3 w-3" />
@@ -264,7 +280,7 @@ export const LegislationLibrary: React.FC = () => {
                   <FileText className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-bold truncate">{detail?.title || `Norma #${detailId}`}</h3>
+                  <h3 className="text-sm font-bold truncate">{cleanTitle(detail?.title) || `Norma #${detailId}`}</h3>
                   <p className="text-xs text-slate-500">
                     {detail?.tipoDeNorma || ''}{detail?.fechaPublicacion ? ` · Pub. ${detail.fechaPublicacion}` : ''}
                   </p>
