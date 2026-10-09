@@ -22,6 +22,18 @@ function cleanTitle(t?: string | null): string {
   return t.replace(/\\/g, ' · ').replace(/\.html?$/i, '').trim();
 }
 
+// Lee el archivo físico tal cual (HTML con sus estilos o PDF) vía su URL directa
+const leerArchivo = async (path: string): Promise<Response | null> => {
+  try {
+    const respuesta = await fetch(path);
+    if (!respuesta.ok) throw new Error('No se pudo leer el archivo');
+    return respuesta;
+  } catch (error) {
+    console.error('Error al leer el archivo:', error);
+    return null;
+  }
+};
+
 export const LegislationLibrary: React.FC = () => {
   const [q, setQ] = useState('');
   const [fechaInicial, setFechaInicial] = useState('');
@@ -147,18 +159,18 @@ export const LegislationLibrary: React.FC = () => {
       const data = await res.json();
       if (data?.success) {
         setDetail(data.doc);
-        // Lee el archivo físico desde fileNormalized (vía /content/:id)
-        try {
-          const fRes = await fetch(`${import.meta.env.BASE_URL}api/legislation/content/${id}`);
-          const fData = await fRes.json();
-          if (fRes.ok && fData?.success) {
-            if (fData.kind === 'text' && fData.content) setFileText(fData.content);
-            else if (fData.kind === 'pdf' && fData.fileUrl) {
-              setFilePdf(`${import.meta.env.BASE_URL}${String(fData.fileUrl).replace(/^\//, '')}`);
+        // Lee el archivo físico desde fileNormalized (vía fileUrl); fallback al content de la BD
+        if (data.doc?.fileUrl && data.doc?.hasFile) {
+          const full = `${import.meta.env.BASE_URL}${String(data.doc.fileUrl).replace(/^\//, '')}`;
+          const respuesta = await leerArchivo(full);
+          if (respuesta) {
+            const ct = respuesta.headers.get('content-type') || '';
+            if (ct.includes('pdf')) {
+              setFilePdf(full);
+            } else {
+              setFileText(await respuesta.text());
             }
           }
-        } catch (fileErr) {
-          console.warn('Sin archivo físico, uso content de BD:', fileErr);
         }
       }
     } catch (err) {
