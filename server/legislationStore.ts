@@ -119,23 +119,81 @@ async function vectorSearch(p: Pool, q: string, limit: number): Promise<any[]> {
 }
 
 /**
- * Búsqueda LÉXICA pura (trigramas sobre sumilla/content, usa idx_*_trgm existentes).
+ * Búsqueda LÉXICA por etapas rápidas (la BD es remota: cada página de más cuesta):
+ * 1) frase exacta 2) si vacía, todas-las-palabras (AND) 3) si vacía, similarity %.
+ * Cada etapa trae LIMIT directo (probado: vuelve al instante) y ordena por fecha.
+ * Sin similarity() en SQL: sobre miles de candidatos en tabla de GBs hace timeout.
  */
 async function trigramSearch(p: Pool, q: string, limit: number): Promise<any[]> {
-  const r = await p.query(
-    {
-      text: `SELECT id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma,
-                    left(content, 1200) AS head,
-                    greatest(similarity(sumilla, $1), similarity(content, $1)) AS score
-             FROM public.html_docs
-             WHERE sumilla % $1 OR content % $1
-             ORDER BY score DESC
-             LIMIT $2`,
-      values: [q, limit],
-      query_timeout: 15000,
-    } as any
-  );
-  return r.rows;
+  const base = `id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma, left(content, 1200) AS head`;
+  const order = `ORDER BY fecha_publicacion DESC NULLS LAST, id DESC LIMIT $`;
+  const run = (text: string, values: any[]) =>
+    p.query({ text, values, query_timeout: 25000 } as any);
+
+  // 1. Frase exacta (cubre también consultas de 1 palabra). Score 2.
+  try {
+    const r = await run(
+      `SELECT ${base}, 2 AS score FROM public.html_docs
+       WHERE (sumilla ILIKE $1 ESCAPE '!' OR content ILIKE $1 ESCAPE '!')
+       ${order}2`,
+      [`%${likeEscape(q)}%`, limit]
+    );
+    if (r.rows.length > 0) return r.rows;
+  } catch (err: any) {
+    console.warn('[Legislation] Frase exacta falló:', err?.message || err);
+  }
+
+  // 2. Todas las palabras (AND). Score 1.
+  const words = queryWords(q);
+  if (words.length > 0) {
+    try {
+      const vals: any[] = [];
+      const andConds = words.map((w) => {
+        vals.push(`%${likeEscape(w)}%`);
+        const ph = `$${vals.length}`;
+        return `(sumilla ILIKE ${ph} ESCAPE '!' OR content ILIKE ${ph} ESCAPE '!')`;
+      });
+      vals.push(limit);
+      const r = await run(
+        `SELECT ${base}, 1 AS score FROM public.html_docs
+         WHERE ${andConds.join(' AND ')}
+         ORDER BY fecha_publicacion DESC NULLS LAST, id DESC LIMIT $${vals.length}`,
+        vals
+      );
+      if (r.rows.length > 0) return r.rows;
+    } catch (err: any) {
+      console.warn('[Legislation] AND de palabras falló:', err?.message || err);
+    }
+  }
+
+  // 3. Similarity % legado (último recurso).
+  try {
+    const r = await run(
+      `SELECT ${base}, greatest(similarity(sumilla, $1), similarity(content, $1)) AS score
+       FROM public.html_docs
+       WHERE sumilla % $1 OR content % $1
+       ORDER BY score DESC LIMIT $2`,
+      [q, Math.min(limit, 10)]
+    );
+    return r.rows;
+  } catch (err: any) {
+    console.warn('[Legislation] Similarity falló:', err?.message || err);
+    return [];
+  }
+}
+
+/** Escapa comodines de LIKE (usando ESCAPE '!'). */
+function likeEscape(s: string): string {
+  return s.replace(/!/g, '!!').replace(/%/g, '!%').replace(/_/g, '!_');
+}
+
+/** Palabras significativas de la consulta (para el AND léxico). */
+function queryWords(q: string): string[] {
+  return q
+    .split(/\s+/)
+    .map((w) => w.replace(/[^a-záéíóúñü0-9]/gi, ''))
+    .filter((w) => w.length > 2)
+    .slice(0, 8);
 }
 
 /**
@@ -231,8 +289,19 @@ export async function searchLegislationStructured(
     conds.push(`fecha_publicacion <= ${push(df)}::date`);
   }
   if (params.q && params.q.trim()) {
-    const ph = push(`%${params.q.trim()}%`);
-    conds.push(`(sumilla ILIKE ${ph} OR content ILIKE ${ph})`);
+    const qt = params.q.trim();
+    const orParts: string[] = [];
+    const phrasePh = push(`%${likeEscape(qt)}%`);
+    orParts.push(`(sumilla ILIKE ${phrasePh} ESCAPE '!' OR content ILIKE ${phrasePh} ESCAPE '!')`);
+    const words = queryWords(qt);
+    if (words.length > 0) {
+      const andParts = words.map((w) => {
+        const ph = push(`%${likeEscape(w)}%`);
+        return `(sumilla ILIKE ${ph} ESCAPE '!' OR content ILIKE ${ph} ESCAPE '!')`;
+      });
+      orParts.push(`(${andParts.join(' AND ')})`);
+    }
+    conds.push(`(${orParts.join(' OR ')})`);
   }
   if (params.tipo && params.tipo.trim()) {
     conds.push(`tipo_de_norma = ${push(params.tipo.trim())}`);
