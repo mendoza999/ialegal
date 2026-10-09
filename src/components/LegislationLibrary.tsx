@@ -35,6 +35,8 @@ export const LegislationLibrary: React.FC = () => {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [detail, setDetail] = useState<any | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [fileHtml, setFileHtml] = useState<string>('');
+  const [fileEmbed, setFileEmbed] = useState<string>('');
 
   function toSafeHtml(raw?: string) {
     if (!raw) return '';
@@ -133,11 +135,31 @@ export const LegislationLibrary: React.FC = () => {
   const openDetail = async (id: number) => {
     setDetailId(id);
     setDetail(null);
+    setFileHtml('');
+    setFileEmbed('');
     setDetailLoading(true);
     try {
       const res = await fetch(`${import.meta.env.BASE_URL}api/legislation/${id}`);
       const data = await res.json();
-      if (data?.success) setDetail(data.doc);
+      if (data?.success) {
+        setDetail(data.doc);
+        // Contenido del ARCHIVO FÍSICO (fileNormalized vía fileUrl); fallback al content de la BD
+        if (data.doc?.fileUrl && data.doc?.hasFile) {
+          try {
+            const fRes = await fetch(`${import.meta.env.BASE_URL}${data.doc.fileUrl.replace(/^\//, '')}`);
+            if (fRes.ok) {
+              const ct = fRes.headers.get('content-type') || '';
+              if (ct.includes('pdf')) {
+                setFileEmbed(`${import.meta.env.BASE_URL}${data.doc.fileUrl.replace(/^\//, '')}`);
+              } else {
+                setFileHtml(toSafeHtml(await fRes.text()));
+              }
+            }
+          } catch (fileErr) {
+            console.warn('No se pudo leer el archivo físico, uso content de BD:', fileErr);
+          }
+        }
+      }
     } catch (err) {
       console.error('Error obteniendo norma:', err);
     } finally {
@@ -379,12 +401,18 @@ export const LegislationLibrary: React.FC = () => {
                   {detail.sumilla}
                 </p>
               )}
-              {contentHtml && (
+              {fileEmbed ? (
+                <iframe
+                  src={fileEmbed}
+                  title={detail?.title || 'Documento original'}
+                  className="w-full h-[60vh] rounded-xl border border-slate-200 dark:border-slate-700 bg-white"
+                />
+              ) : (fileHtml || contentHtml) ? (
                 <div
                   className="leg-content max-w-none text-xs sm:text-sm text-slate-800 dark:text-slate-200"
-                  dangerouslySetInnerHTML={{ __html: contentHtml }}
+                  dangerouslySetInnerHTML={{ __html: fileHtml || contentHtml }}
                 />
-              )}
+              ) : null}
             </div>
           </div>
         </div>
