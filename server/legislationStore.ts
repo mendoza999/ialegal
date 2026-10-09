@@ -320,7 +320,7 @@ export interface StructuredSearchParams {
  */
 export async function searchLegislationStructured(
   params: StructuredSearchParams
-): Promise<{ results: LegislationDoc[]; total: number; limit: number; offset: number }> {
+): Promise<{ results: LegislationDoc[]; total: number; limit: number; offset: number; latestOnly?: boolean; latestDate?: string }> {
   const limit = Math.min(Math.max(params.limit || 20, 1), 100);
   const offset = Math.max(params.offset || 0, 0);
   const p = getPool();
@@ -348,6 +348,11 @@ export async function searchLegislationStructured(
   }
   if (params.tipo && params.tipo.trim()) {
     conds.push(`tipo_de_norma = ${basePush(params.tipo.trim())}`);
+  }
+  // Sin ningún parámetro: solo los registros de la ÚLTIMA fecha disponible
+  const defaultLatest = conds.length === 0 && phraseVal === null && wordVals.length === 0;
+  if (defaultLatest) {
+    conds.push(`fecha_publicacion = (SELECT MAX(fecha_publicacion) FROM public.html_docs)`);
   }
   // Cada etapa arma SU propio SQL con SU propio array de valores (nada compartido).
   const likePair = (ph: string) => `(sumilla ILIKE ${ph} ESCAPE '!' OR content ILIKE ${ph} ESCAPE '!')`;
@@ -407,7 +412,11 @@ export async function searchLegislationStructured(
     const cnt = await p.query(
       { text: `SELECT count(*)::int AS total FROM public.html_docs ${countWhere}`, values: countVals, query_timeout: 25000 } as any
     );
-    return { results: rows.map(mapRow), total: cnt.rows[0]?.total || 0, limit, offset };
+    const mapped = rows.map(mapRow);
+    return {
+      results: mapped, total: cnt.rows[0]?.total || 0, limit, offset,
+      ...(defaultLatest ? { latestOnly: true as const, latestDate: mapped[0]?.fechaPublicacion || undefined } : {}),
+    };
   } catch (err: any) {
     console.error('[Legislation] Structured search falló:', err?.message || err);
     return { results: [], total: 0, limit, offset };

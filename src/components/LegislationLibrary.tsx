@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, CalendarDays, FileText, ChevronLeft, ChevronRight, X, Scale, Tag, ExternalLink } from 'lucide-react';
 import { useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import { Console } from 'console';
 
 interface LegislationResult {
   id: number;
@@ -30,6 +31,7 @@ export const LegislationLibrary: React.FC = () => {
   const [results, setResults] = useState<LegislationResult[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [latestDate, setLatestDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
@@ -39,7 +41,7 @@ export const LegislationLibrary: React.FC = () => {
   function toSafeHtml(raw?: string) {
     if (!raw) return '';
     let html = raw;
-
+    console.log("html", html);
     // 1) Si viene escapado (&lt;p&gt;), lo decodifica
     if (/&lt;\/?[a-z][\s\S]*?&gt;/i.test(html)) {
       const t = document.createElement('textarea');
@@ -94,6 +96,7 @@ export const LegislationLibrary: React.FC = () => {
         setResults(data.results || []);
         setTotal(data.total || 0);
         setOffset(data.offset || 0);
+        setLatestDate(data.latestOnly ? (data.latestDate || null) : null);
       }
     } catch (err) {
       console.error('Error buscando normativa:', err);
@@ -202,49 +205,49 @@ export const LegislationLibrary: React.FC = () => {
             </p>
           </div>
         ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <label className="space-y-1">
-            <span className="text-[11px] font-bold uppercase text-slate-500">Texto (sumilla o contenido)</span>
-            <input
-              type="text"
-              value={q}
-              onChange={e => setQ(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') runSearch(0); }}
-              placeholder="Ej. gratificaciones, IGV…"
-              className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-[11px] font-bold uppercase text-slate-500">Fecha inicial</span>
-            <input
-              type="date"
-              value={fechaInicial}
-              onChange={e => setFechaInicial(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-[11px] font-bold uppercase text-slate-500">Fecha final</span>
-            <input
-              type="date"
-              value={fechaFinal}
-              onChange={e => setFechaFinal(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-[11px] font-bold uppercase text-slate-500">Tipo de norma</span>
-            <select
-              value={tipo}
-              onChange={e => setTipo(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
-            >
-              <option value="">Todas</option>
-              <option value="Jurisprudencia">Jurisprudencia</option>
-              <option value="Legislacion">Legislacion</option>
-            </select>
-          </label>
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <label className="space-y-1">
+              <span className="text-[11px] font-bold uppercase text-slate-500">Texto (sumilla o contenido)</span>
+              <input
+                type="text"
+                value={q}
+                onChange={e => setQ(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') runSearch(0); }}
+                placeholder="Ej. gratificaciones, IGV…"
+                className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-[11px] font-bold uppercase text-slate-500">Fecha inicial</span>
+              <input
+                type="date"
+                value={fechaInicial}
+                onChange={e => setFechaInicial(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-[11px] font-bold uppercase text-slate-500">Fecha final</span>
+              <input
+                type="date"
+                value={fechaFinal}
+                onChange={e => setFechaFinal(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-[11px] font-bold uppercase text-slate-500">Tipo de norma</span>
+              <select
+                value={tipo}
+                onChange={e => setTipo(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
+              >
+                <option value="">Todas</option>
+                <option value="Jurisprudencia">Jurisprudencia</option>
+                <option value="Legislacion">Legislacion</option>
+              </select>
+            </label>
+          </div>
         )}
         <div className="flex items-center space-x-2">
           <button
@@ -264,7 +267,9 @@ export const LegislationLibrary: React.FC = () => {
             </button>
           )}
           {searched && (
-            <span className="text-[11px] text-slate-400 ml-auto">{total} resultado{total === 1 ? '' : 's'}</span>
+            <span className="text-[11px] text-slate-400 ml-auto">
+              {latestDate ? `Última fecha registrada: ${latestDate} · ` : ''}{total} resultado{total === 1 ? '' : 's'}
+            </span>
           )}
         </div>
         {mode === 'filtros' && (
@@ -358,6 +363,8 @@ export const LegislationLibrary: React.FC = () => {
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {/* 
             {detail?.fileUrl && (
               <div className="px-6 py-2.5 bg-emerald-50/70 dark:bg-emerald-950/30 border-b border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-between gap-2">
                 <span className="text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold truncate">
@@ -376,6 +383,9 @@ export const LegislationLibrary: React.FC = () => {
                 )}
               </div>
             )}
+             */}
+
+
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto text-sm leading-relaxed">
               {detailLoading && <p className="text-slate-400">Cargando norma…</p>}
               {detail?.sumilla && (
