@@ -202,6 +202,22 @@ async function startServer() {
     }
   });
 
+  // 0c2. Búsqueda HÍBRIDA de normativa (vectorial bge-m3 + léxica trigram, fusión RRF).
+  // ?q=texto & limit — para el modo "Híbrida" del tab Normativa.
+  app.get('/api/legislation/hybrid', async (req, res) => {
+    try {
+      const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+      if (!q) return res.status(400).json({ error: 'Parámetro q requerido.' });
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+      const results = await legislationStore.searchLegislationHybrid(
+        q, Number.isFinite(limit) ? Math.min(Math.max(limit, 1), 30) : 10
+      );
+      res.json({ success: true, results, total: results.length, mode: 'hybrid' });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || 'Error en búsqueda híbrida.' });
+    }
+  });
+
   // 0d. Detalle de una norma (content HTML completo para el modal del tab Normativa)
   app.get('/api/legislation/:id', async (req, res) => {
     try {

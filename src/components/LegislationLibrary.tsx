@@ -26,6 +26,7 @@ export const LegislationLibrary: React.FC = () => {
   const [fechaInicial, setFechaInicial] = useState('');
   const [fechaFinal, setFechaFinal] = useState('');
   const [tipo, setTipo] = useState('');
+  const [mode, setMode] = useState<'filtros' | 'hibrida'>('filtros');
   const [results, setResults] = useState<LegislationResult[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -52,7 +53,7 @@ export const LegislationLibrary: React.FC = () => {
     if (!/<\/?[a-z][\s\S]*>/i.test(html)) {
       const MARKER = /(\bVISTOS\s*:|\bCONSIDERANDO\s*:|\bSE\s+RESUELVE\s*:?|\bSE\s+ACUERDA\s*:?|\bDECRETA\s*:|\bArt[íi]culo\s+\d+[°ºoª]?\s*(?:[.·\-–:])?|\bReg[íi]strese,\s*comun[íi]quese[^.]*\.?)/gi;
       const HEADING = /^(VISTOS|CONSIDERANDO|SE\s+RESUELVE|SE\s+ACUERDA|DECRETA|Art[íi]culo)/i;
-      const LINE_HEAD = /^(art[íi]culo\s+\S+|cap[íi]tulo\s+\S+|t[íi]tulo\s+\S+|secci[óo]n\s+\S+|disposici[óo]n\s+\S+|anexo\s*\S*|considerando|por cuanto|decreta|resuelve)\b/i;
+      const LINE_HEAD = /^(Art[íi]culo\s+\S+|Cap[íi]tulo\s+\S+|a\)\S+|b\)+\S+|c\)\S+|d\)\S+|e\)\S+|T[íi]tulo\s+\S+|sScci[óo]n\s+\S+|Disposici[óo]n\s+\S+|Anexo\s*\S*|considerando|por cuanto|decreta|resuelve)\b/i;
 
       html = html
         .split(/\n{2,}/)
@@ -72,7 +73,6 @@ export const LegislationLibrary: React.FC = () => {
         })
         .join('');
     }
-
     // 3) Limpia scripts y atributos peligrosos
     return DOMPurify.sanitize(html);
   }
@@ -102,6 +102,27 @@ export const LegislationLibrary: React.FC = () => {
       setSearched(true);
     }
   }, [q, fechaInicial, fechaFinal, tipo]);
+
+  // Búsqueda HÍBRIDA: vectorial (bge-m3) + léxica (trigramas) con fusión RRF
+  const runHybrid = useCallback(async () => {
+    if (!q.trim()) return;
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ q: q.trim(), limit: '20' });
+      const res = await fetch(`${import.meta.env.BASE_URL}api/legislation/hybrid?${params.toString()}`);
+      const data = await res.json();
+      if (data?.success) {
+        setResults(data.results || []);
+        setTotal(data.total || 0);
+        setOffset(0);
+      }
+    } catch (err) {
+      console.error('Error en búsqueda híbrida:', err);
+    } finally {
+      setLoading(false);
+      setSearched(true);
+    }
+  }, [q]);
 
   // Carga inicial: últimas normas publicadas
   useEffect(() => {
@@ -140,6 +161,43 @@ export const LegislationLibrary: React.FC = () => {
 
       {/* Filtros */}
       <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+        {/* Modo de búsqueda */}
+        <div className="flex items-center space-x-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 w-fit">
+          <button
+            onClick={() => setMode('filtros')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'filtros'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
+              : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'}`}
+          >
+            Por filtros
+          </button>
+          <button
+            onClick={() => setMode('hibrida')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'hibrida'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
+              : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'}`}
+          >
+            Híbrida (semántica + textual)
+          </button>
+        </div>
+        {mode === 'hibrida' ? (
+          <div className="space-y-2">
+            <label className="space-y-1 block">
+              <span className="text-[11px] font-bold uppercase text-slate-500">Consulta en lenguaje natural o términos exactos</span>
+              <input
+                type="text"
+                value={q}
+                onChange={e => setQ(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') runHybrid(); }}
+                placeholder="Ej. crédito fiscal por compras con factura electrónica…"
+                className="w-full px-3 py-2 rounded-xl text-sm border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:border-emerald-500"
+              />
+            </label>
+            <p className="text-[11px] text-slate-400">
+              Combina vectores semánticos (bge-m3) + coincidencia textual (trigramas) con fusión RRF: encuentra por significado y por términos exactos (números de ley, artículos).
+            </p>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <label className="space-y-1">
             <span className="text-[11px] font-bold uppercase text-slate-500">Texto (sumilla o contenido)</span>
@@ -183,10 +241,11 @@ export const LegislationLibrary: React.FC = () => {
             </select>
           </label>
         </div>
+        )}
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => runSearch(0)}
-            disabled={loading}
+            onClick={() => (mode === 'hibrida' ? runHybrid() : runSearch(0))}
+            disabled={loading || (mode === 'hibrida' && !q.trim())}
             className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-60"
           >
             <Search className="h-3.5 w-3.5" />
@@ -204,9 +263,11 @@ export const LegislationLibrary: React.FC = () => {
             <span className="text-[11px] text-slate-400 ml-auto">{total} resultado{total === 1 ? '' : 's'}</span>
           )}
         </div>
-        <p className="text-[11px] text-slate-400">
-          Solo fecha inicial = normas publicadas ese día · Ambas fechas = rango inclusivo.
-        </p>
+        {mode === 'filtros' && (
+          <p className="text-[11px] text-slate-400">
+            Solo fecha inicial = normas publicadas ese día · Ambas fechas = rango inclusivo.
+          </p>
+        )}
       </div>
 
       {/* Resultados */}
@@ -246,8 +307,8 @@ export const LegislationLibrary: React.FC = () => {
         )}
       </div>
 
-      {/* Paginación */}
-      {totalPages > 1 && (
+      {/* Paginación (solo modo filtros; la híbrida trae el top-20 fusionado) */}
+      {mode === 'filtros' && totalPages > 1 && (
         <div className="flex items-center justify-center space-x-3 text-xs font-semibold">
           <button
             onClick={() => runSearch(Math.max(0, offset - PAGE_SIZE))}

@@ -97,57 +97,101 @@ async function embedQuery(text: string): Promise<number[] | null> {
 }
 
 /**
- * Búsqueda semántica para el RAG federado: pgvector <=> con bge-m3,
- * con fallback a trigramas (similarity sobre sumilla/content).
+ * Búsqueda VECTORIAL pura (pgvector <=> con bge-m3). [] si falla o no hay embeddings.
  */
-export async function searchLegislationSemantic(query: string, limit = 4): Promise<LegislationDoc[]> {
+async function vectorSearch(p: Pool, q: string, limit: number): Promise<any[]> {
+  const vec = await embedQuery(q);
+  if (!vec) return [];
+  const literal = `[${vec.join(',')}]`;
+  const r = await p.query(
+    {
+      text: `SELECT id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma,
+                    left(content, 1200) AS head,
+                    1 - (embedding <=> $1::vector) AS score
+             FROM public.html_docs
+             ORDER BY embedding <=> $1::vector
+             LIMIT $2`,
+      values: [literal, limit],
+      query_timeout: 15000,
+    } as any
+  );
+  return r.rows;
+}
+
+/**
+ * Búsqueda LÉXICA pura (trigramas sobre sumilla/content, usa idx_*_trgm existentes).
+ */
+async function trigramSearch(p: Pool, q: string, limit: number): Promise<any[]> {
+  const r = await p.query(
+    {
+      text: `SELECT id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma,
+                    left(content, 1200) AS head,
+                    greatest(similarity(sumilla, $1), similarity(content, $1)) AS score
+             FROM public.html_docs
+             WHERE sumilla % $1 OR content % $1
+             ORDER BY score DESC
+             LIMIT $2`,
+      values: [q, limit],
+      query_timeout: 15000,
+    } as any
+  );
+  return r.rows;
+}
+
+/**
+ * Búsqueda HÍBRIDA: corre vectorial + léxica en paralelo y fusiona con
+ * Reciprocal Rank Fusion (RRF, k=60). Lo que ambos rankings rescatan sube primero;
+ * si un ranking falla o viene vacío, el otro sostiene el resultado.
+ */
+export async function searchLegislationHybrid(query: string, limit = 6): Promise<LegislationDoc[]> {
   const p = getPool();
   if (!p || !query.trim()) return [];
   const q = query.trim().slice(0, 500);
+  const N = Math.max(limit * 2, 10);
 
-  // 1. Vector (pgvector). Si falta la extensión o falla HF → cae al trigram.
+  let vecRows: any[] = [];
+  let triRows: any[] = [];
   try {
-    const vec = await embedQuery(q);
-    if (vec) {
-      const literal = `[${vec.join(',')}]`;
-      const r = await p.query(
-        {
-          text: `SELECT id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma,
-                        left(content, 1200) AS head,
-                        1 - (embedding <=> $1::vector) AS score
-                 FROM public.html_docs
-                 ORDER BY embedding <=> $1::vector
-                 LIMIT $2`,
-          values: [literal, limit],
-          query_timeout: 15000,
-        } as any
-      );
-      if (r.rows.length > 0) return r.rows.map(mapRow);
-    }
+    [vecRows, triRows] = await Promise.all([
+      vectorSearch(p, q, N).catch((err) => {
+        console.warn('[Legislation] Vector falló en híbrida:', err?.message || err);
+        return [];
+      }),
+      trigramSearch(p, q, N).catch((err) => {
+        console.warn('[Legislation] Trigram falló en híbrida:', err?.message || err);
+        return [];
+      }),
+    ]);
   } catch (err: any) {
-    console.warn('[Legislation] Vector search falló, uso trigram:', err?.message || err);
-  }
-
-  // 2. Trigram (usa idx_sumilla_trgm / idx_content_trgm existentes).
-  try {
-    const r = await p.query(
-      {
-        text: `SELECT id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma,
-                      left(content, 1200) AS head,
-                      greatest(similarity(sumilla, $1), similarity(content, $1)) AS score
-               FROM public.html_docs
-               WHERE sumilla % $1 OR content % $1
-               ORDER BY score DESC
-               LIMIT $2`,
-        values: [q, limit],
-        query_timeout: 15000,
-      } as any
-    );
-    return r.rows.map(mapRow);
-  } catch (err: any) {
-    console.error('[Legislation] Trigram search falló:', err?.message || err);
+    console.error('[Legislation] Híbrida falló:', err?.message || err);
     return [];
   }
+
+  const K = 60;
+  const fused = new Map<number, { row: any; score: number }>();
+  const vote = (rows: any[]) => {
+    rows.forEach((row, rank) => {
+      const prev = fused.get(row.id);
+      const s = 1 / (K + rank + 1);
+      if (prev) prev.score += s;
+      else fused.set(row.id, { row, score: s });
+    });
+  };
+  vote(vecRows);
+  vote(triRows);
+
+  return [...fused.values()]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(({ row, score }) => ({ ...mapRow(row), score }));
+}
+
+/**
+ * Búsqueda semántica para el RAG federado: ahora híbrida (vectorial + léxica con RRF).
+ * Misma firma de antes: los llamadores no cambian.
+ */
+export async function searchLegislationSemantic(query: string, limit = 4): Promise<LegislationDoc[]> {
+  return searchLegislationHybrid(query, limit);
 }
 
 export interface StructuredSearchParams {
