@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import fs from 'fs';
 
 // Acceso a la 2da BD Postgres (tabla public.html_docs).
 // Nunca tumba el chat: sin LEGISLATION_DATABASE_URL o con la BD caída,
@@ -12,7 +13,54 @@ export interface LegislationDoc {
   tipoNorma: any; // json
   fechaPublicacion: string | null; // YYYY-MM-DD
   tipoDeNorma: string;
+  fileUrl?: string; // endpoint para mostrar el archivo original
+  fileNormalized?: string; // ruta física normalizada en el VPS
   score?: number;
+}
+
+// Base documental en el VPS (override por env para otros entornos).
+const DOCS_BASE = process.env.LEGISLATION_DOCS_BASE || '/srv/backend_documentos';
+
+/**
+ * Ruta directa del archivo según tipo_de_norma (siempre estilo POSIX: los archivos
+ * viven en el VPS Linux aunque el backend corra en Windows para desarrollo):
+ * Legislacion → /srv/backend_documentos/<title>
+ * Jurisprudencia → /srv/backend_documentos/Jurisprudencia/<title>
+ * Devuelve null si el título permitiría escapar de la base (path traversal).
+ */
+export function fileNormalizedFor(title: string, tipoDeNorma: string): string | null {
+  if (!title) return null;
+  const sub = tipoDeNorma === 'Jurisprudencia' ? 'Jurisprudencia/' : '';
+  const rel = title.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!rel || rel.split('/').includes('..')) return null;
+  return `${DOCS_BASE}/${sub}${rel}`;
+}
+
+/** Columnas mínimas para resolver el archivo (sin traer el content). */
+export async function getLegislationFileInfo(id: number): Promise<{ id: number; title: string; tipoDeNorma: string } | null> {
+  const p = getPool();
+  if (!p || !Number.isInteger(id)) return null;
+  try {
+    const r = await p.query(
+      { text: 'SELECT id, title, tipo_de_norma FROM public.html_docs WHERE id = $1', values: [id], query_timeout: 10000 } as any
+    );
+    if (r.rows.length === 0) return null;
+    return { id: r.rows[0].id, title: r.rows[0].title, tipoDeNorma: r.rows[0].tipo_de_norma || 'Legislacion' };
+  } catch (err: any) {
+    console.error('[Legislation] fileInfo falló:', err?.message || err);
+    return null;
+  }
+}
+
+/** true si el archivo físico existe (para decidir si mostrar el botón "ver original"). */
+export function legislationFileExists(title: string, tipoDeNorma: string): boolean {
+  const fp = fileNormalizedFor(title, tipoDeNorma);
+  if (!fp) return false;
+  try {
+    return fs.existsSync(fp);
+  } catch {
+    return false;
+  }
 }
 
 let pool: Pool | null = null;
@@ -51,6 +99,7 @@ export function stripHtml(html?: string | null): string {
 function mapRow(r: any): LegislationDoc {
   const sumilla: string | null = r.sumilla || null;
   const excerpt = (sumilla || stripHtml(r.head || r.content || '')).slice(0, 600);
+  const tipoDeNorma = r.tipo_de_norma || 'Legislacion';
   return {
     id: r.id,
     title: r.title,
@@ -60,7 +109,9 @@ function mapRow(r: any): LegislationDoc {
     fechaPublicacion: r.fecha_publicacion
       ? new Date(r.fecha_publicacion).toISOString().slice(0, 10)
       : null,
-    tipoDeNorma: r.tipo_de_norma || 'Legislacion',
+    tipoDeNorma,
+    fileUrl: `/api/legislation/file/${r.id}`,
+    fileNormalized: fileNormalizedFor(r.title, tipoDeNorma) || undefined,
     score: typeof r.score === 'number' ? r.score : undefined,
   };
 }
@@ -276,56 +327,87 @@ export async function searchLegislationStructured(
   if (!p) return { results: [], total: 0, limit, offset };
 
   const conds: string[] = [];
-  const vals: any[] = [];
-  const push = (v: any) => { vals.push(v); return `$${vals.length}`; };
+  const baseVals: any[] = [];
+  const basePush = (v: any) => { baseVals.push(v); return `$${baseVals.length}`; };
+  let phraseVal: string | null = null;
+  let wordVals: string[] = [];
 
   const di = params.fechaInicial;
   const df = params.fechaFinal;
   if (di && df) {
-    conds.push(`fecha_publicacion BETWEEN ${push(di)}::date AND ${push(df)}::date`);
+    conds.push(`fecha_publicacion BETWEEN ${basePush(di)}::date AND ${basePush(df)}::date`);
   } else if (di) {
-    conds.push(`fecha_publicacion = ${push(di)}::date`);
+    conds.push(`fecha_publicacion = ${basePush(di)}::date`);
   } else if (df) {
-    conds.push(`fecha_publicacion <= ${push(df)}::date`);
+    conds.push(`fecha_publicacion <= ${basePush(df)}::date`);
   }
   if (params.q && params.q.trim()) {
     const qt = params.q.trim();
-    const orParts: string[] = [];
-    const phrasePh = push(`%${likeEscape(qt)}%`);
-    orParts.push(`(sumilla ILIKE ${phrasePh} ESCAPE '!' OR content ILIKE ${phrasePh} ESCAPE '!')`);
-    const words = queryWords(qt);
-    if (words.length > 0) {
-      const andParts = words.map((w) => {
-        const ph = push(`%${likeEscape(w)}%`);
-        return `(sumilla ILIKE ${ph} ESCAPE '!' OR content ILIKE ${ph} ESCAPE '!')`;
-      });
-      orParts.push(`(${andParts.join(' AND ')})`);
-    }
-    conds.push(`(${orParts.join(' OR ')})`);
+    phraseVal = `%${likeEscape(qt)}%`;
+    wordVals = queryWords(qt).map((w) => `%${likeEscape(w)}%`);
   }
   if (params.tipo && params.tipo.trim()) {
-    conds.push(`tipo_de_norma = ${push(params.tipo.trim())}`);
+    conds.push(`tipo_de_norma = ${basePush(params.tipo.trim())}`);
   }
-  const where = conds.length > 0 ? `WHERE ${conds.join(' AND ')}` : '';
+  // Cada etapa arma SU propio SQL con SU propio array de valores (nada compartido).
+  const likePair = (ph: string) => `(sumilla ILIKE ${ph} ESCAPE '!' OR content ILIKE ${ph} ESCAPE '!')`;
+  const nBase = baseVals.length;
+  const at = (i: number) => `$${nBase + i}`; // placeholders relativos tras los baseVals
+  const baseWhere = conds.length > 0 ? `WHERE ${conds.join(' AND ')}` : '';
+  const andBase = (extra: string) => (baseWhere ? `${baseWhere} AND ${extra}` : `WHERE ${extra}`);
+  const phraseCond = phraseVal !== null ? likePair(at(1)) : '';
+  const wordAndCond = wordVals.length > 0
+    ? `(${wordVals.map((_, k) => likePair(at(2 + k))).join(' AND ')})`
+    : '';
+  // Conteo con filtro completo (sin ORDER BY: rápido aunque haya miles de matches)
+  const countWhere = phraseCond
+    ? andBase(wordAndCond ? `(${phraseCond} OR ${wordAndCond})` : phraseCond)
+    : baseWhere;
+  const countVals = [...baseVals];
+  if (phraseVal !== null) countVals.push(phraseVal);
+  countVals.push(...wordVals);
+  const selectCols = `id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma, left(content, 1200) AS head`;
+  const orderLim = `ORDER BY fecha_publicacion DESC NULLS LAST, id DESC LIMIT ${limit} OFFSET ${offset}`;
 
   try {
-    const [rows, cnt] = await Promise.all([
-      p.query(
+    // Filas por etapas (igual que la rama léxica híbrida): frase, si vacía AND de palabras.
+    // Cada etapa combina baseVals + sus valores (los conds ya vienen numerados con at()).
+    let rows: any[] = [];
+    if (phraseVal !== null) {
+      const r = await p.query(
         {
-          text: `SELECT id, title, sumilla, tipo_norma, fecha_publicacion, tipo_de_norma,
-                        left(content, 1200) AS head
-                 FROM public.html_docs ${where}
-                 ORDER BY fecha_publicacion DESC NULLS LAST, id DESC
-                 LIMIT ${limit} OFFSET ${offset}`,
-          values: vals,
-          query_timeout: 15000,
+          text: `SELECT ${selectCols} FROM public.html_docs ${andBase(phraseCond)} ${orderLim}`,
+          values: [...baseVals, phraseVal],
+          query_timeout: 25000,
         } as any
-      ),
-      p.query(
-        { text: `SELECT count(*)::int AS total FROM public.html_docs ${where}`, values: vals, query_timeout: 15000 } as any
-      ),
-    ]);
-    return { results: rows.rows.map(mapRow), total: cnt.rows[0]?.total || 0, limit, offset };
+      );
+      rows = r.rows;
+    }
+    if (rows.length === 0 && wordVals.length > 0) {
+      const wCond = `(${wordVals.map((_, k) => likePair(`$${nBase + k + 1}`)).join(' AND ')})`;
+      const r = await p.query(
+        {
+          text: `SELECT ${selectCols} FROM public.html_docs ${andBase(wCond)} ${orderLim}`,
+          values: [...baseVals, ...wordVals],
+          query_timeout: 25000,
+        } as any
+      );
+      rows = r.rows;
+    }
+    if (rows.length === 0 && !phraseCond && !wordAndCond) {
+      const r = await p.query(
+        {
+          text: `SELECT ${selectCols} FROM public.html_docs ${baseWhere} ${orderLim}`,
+          values: baseVals,
+          query_timeout: 25000,
+        } as any
+      );
+      rows = r.rows;
+    }
+    const cnt = await p.query(
+      { text: `SELECT count(*)::int AS total FROM public.html_docs ${countWhere}`, values: countVals, query_timeout: 25000 } as any
+    );
+    return { results: rows.map(mapRow), total: cnt.rows[0]?.total || 0, limit, offset };
   } catch (err: any) {
     console.error('[Legislation] Structured search falló:', err?.message || err);
     return { results: [], total: 0, limit, offset };
@@ -347,6 +429,7 @@ export async function getLegislationById(id: number): Promise<any | null> {
     );
     if (r.rows.length === 0) return null;
     const row = r.rows[0];
+    const tipoDeNorma = row.tipo_de_norma || 'Legislacion';
     return {
       id: row.id,
       title: row.title,
@@ -355,7 +438,10 @@ export async function getLegislationById(id: number): Promise<any | null> {
       fechaPublicacion: row.fecha_publicacion
         ? new Date(row.fecha_publicacion).toISOString().slice(0, 10)
         : null,
-      tipoDeNorma: row.tipo_de_norma,
+      tipoDeNorma,
+      fileUrl: `/api/legislation/file/${row.id}`,
+      fileNormalized: fileNormalizedFor(row.title, tipoDeNorma) || undefined,
+      hasFile: legislationFileExists(row.title, tipoDeNorma),
       content: row.content,
     };
   } catch (err: any) {

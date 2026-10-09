@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, CalendarDays, FileText, ChevronLeft, ChevronRight, X, Scale, Tag } from 'lucide-react';
+import { Search, CalendarDays, FileText, ChevronLeft, ChevronRight, X, Scale, Tag, ExternalLink } from 'lucide-react';
 import { useMemo } from 'react';
 import DOMPurify from 'dompurify';
 
@@ -354,6 +354,24 @@ export const LegislationLibrary: React.FC = () => {
                 <X className="h-5 w-5" />
               </button>
             </div>
+            {detail?.fileUrl && (
+              <div className="px-6 py-2.5 bg-emerald-50/70 dark:bg-emerald-950/30 border-b border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold truncate">
+                  {detail?.fileNormalized || 'Documento original'}
+                </span>
+                {detail?.hasFile !== false && (
+                  <a
+                    href={`${import.meta.env.BASE_URL}${detail.fileUrl.replace(/^\//, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white whitespace-nowrap"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    <span>Abrir original</span>
+                  </a>
+                )}
+              </div>
+            )}
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto text-sm leading-relaxed">
               {detailLoading && <p className="text-slate-400">Cargando norma…</p>}
               {detail?.sumilla && (

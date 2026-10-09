@@ -560,7 +560,7 @@ Reglas de respuesta:
       quote: doc.excerpt.slice(0, 180) + '...',
       relevanceScore: 98,
       legalBasis: `${doc.tipoDeNorma || 'Legislación'} · pub. ${doc.fechaPublicacion || 's/f'}`,
-      fileUrl: `/api/legislation/${doc.id}`,
+      fileUrl: `/api/legislation/file/${doc.id}`,
       source: 'legislacion' as const,
       fechaPublicacion: doc.fechaPublicacion || undefined,
       tipoNorma: typeof doc.tipoNorma === 'string' ? doc.tipoNorma : undefined
