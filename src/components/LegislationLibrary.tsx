@@ -235,20 +235,21 @@ export const LegislationLibrary: React.FC = () => {
       const data = await res.json();
       if (data?.success) {
         setDetail(data.doc);
-        // Lee el archivo físico desde fileNormalized (vía fileUrl); fallback al content de la BD
+        // Lee el archivo físico desde fileNormalized (vía fileUrl); fallback al content de la BD.
+        // El HTML se muestra CRUDO en srcDoc para conservar sus propios estilos
+        // (la extracción a texto plano pierde centrado, negritas y tamaños).
         if (data.doc?.fileUrl && data.doc?.hasFile) {
           const full = `${import.meta.env.BASE_URL}${String(data.doc.fileUrl).replace(/^\//, '')}`;
           if (/\.pdf$/i.test(full)) {
             setFilePdf(full);
           } else {
             try {
-              const texto = await leerArchivo(full);
-              if (texto) {
-                const esc = texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                setFileText(`<div style="white-space:pre-wrap;">${esc}</div>`);
-              }
+              const respuesta = await fetch(full);
+              if (!respuesta.ok) throw new Error('No se pudo leer el archivo');
+              const htmlCrudo = await respuesta.text();
+              if (htmlCrudo) setFileText(htmlCrudo);
             } catch (fileErr) {
-              console.warn('Sin texto extraíble, se muestra el archivo original:', fileErr);
+              console.warn('Sin archivo legible, se muestra el original embebido:', fileErr);
             }
           }
         }
