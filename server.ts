@@ -246,6 +246,20 @@ async function startServer() {
     }
   });
 
+  // 0d3. Contenido del archivo físico leído desde fileNormalized (para el popup).
+  // HTML/texto → content inline; PDF/binario → fileUrl para visor.
+  app.get('/api/legislation/content/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'ID inválido.' });
+      const file = await legislationStore.readLegislationFile(id);
+      if (!file) return res.status(404).json({ error: 'Archivo no disponible en el servidor.' });
+      res.json({ success: true, ...file });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || 'Error leyendo el archivo.' });
+    }
+  });
+
   // 0d. Detalle de una norma (content HTML completo para el modal del tab Normativa)
   app.get('/api/legislation/:id', async (req, res) => {
     try {

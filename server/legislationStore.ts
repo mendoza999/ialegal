@@ -74,6 +74,41 @@ export function legislationFileExists(title: string, tipoDeNorma: string): boole
   }
 }
 
+const TEXT_EXTS = new Set(['.html', '.htm', '.txt', '.xml', '.css', '.json']);
+
+/**
+ * Lee el contenido del archivo físico desde fileNormalized.
+ * Texto (html/txt/...) → { kind:'text', content }; PDF/binario → { kind:'pdf', fileUrl }.
+ */
+export async function readLegislationFile(id: number): Promise<
+  | { kind: 'text'; content: string; fileName: string; fileNormalized: string }
+  | { kind: 'pdf'; fileUrl: string; fileName: string; fileNormalized: string }
+  | null
+> {
+  const info = await getLegislationFileInfo(id);
+  if (!info) return null;
+  const fp = fileNormalizedFor(info.title, info.tipoDeNorma);
+  if (!fp) return null;
+  const ext = fp.slice(fp.lastIndexOf('.')).toLowerCase();
+  const fileUrl = fileHrefFor(info.title, info.tipoDeNorma) || undefined;
+  if (TEXT_EXTS.has(ext)) {
+    try {
+      const content = await fs.promises.readFile(fp, 'utf-8');
+      return { kind: 'text', content, fileName: info.title, fileNormalized: fp };
+    } catch {
+      return null;
+    }
+  }
+  // PDF u otro binario: se muestra vía URL estática
+  try {
+    await fs.promises.access(fp, fs.constants.R_OK);
+  } catch {
+    return null;
+  }
+  if (!fileUrl) return null;
+  return { kind: 'pdf', fileUrl, fileName: info.title, fileNormalized: fp };
+}
+
 let pool: Pool | null = null;
 
 function getPool(): Pool | null {

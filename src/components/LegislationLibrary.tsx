@@ -37,44 +37,47 @@ export const LegislationLibrary: React.FC = () => {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [detail, setDetail] = useState<any | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  // Contenido leído del archivo físico (fileNormalized): html con sus estilos o pdf
+  const [fileText, setFileText] = useState<string>('');
+  const [filePdf, setFilePdf] = useState<string>('');
 
   function toSafeHtml(raw?: string) {
     if (!raw) return '';
     let html = raw;
     console.log("html", html);
     // 1) Si viene escapado (&lt;p&gt;), lo decodifica
-    if (/&lt;\/?[a-z][\s\S]*?&gt;/i.test(html)) {
-      const t = document.createElement('textarea');
-      t.innerHTML = html;
-      html = t.value;
-    }
+    // if (/&lt;\/?[a-z][\s\S]*?&gt;/i.test(html)) {
+    //   const t = document.createElement('textarea');
+    //   t.innerHTML = html;
+    //   html = t.value;
+    // }
 
     // 2) Texto plano → HTML con estructura legal. Muchas normas vienen en UN SOLO
     // bloque sin saltos de línea, así que además de partir por líneas se segmenta
     // por marcadores inline: VISTOS, CONSIDERANDO, SE RESUELVE, Artículo N.º, etc.
-    if (!/<\/?[a-z][\s\S]*>/i.test(html)) {
-      const MARKER = /(\bVISTOS\s*:|\bCONSIDERANDO\s*:|\bSE\s+RESUELVE\s*:?|\bSE\s+ACUERDA\s*:?|\bDECRETA\s*:|\bArt[íi]culo\s+\d+[°ºoª]?\s*(?:[.·\-–:])?|\bReg[íi]strese,\s*comun[íi]quese[^.]*\.?)/gi;
-      const HEADING = /^(VISTOS|CONSIDERANDO|SE\s+RESUELVE|SE\s+ACUERDA|DECRETA|Art[íi]culo)/i;
-      const LINE_HEAD = /^(Art[íi]culo\s+\S+|Cap[íi]tulo\s+\S+|a\)\S+|b\)+\S+|c\)\S+|d\)\S+|e\)\S+|T[íi]tulo\s+\S+|sScci[óo]n\s+\S+|Disposici[óo]n\s+\S+|Anexo\s*\S*|considerando|por cuanto|decreta|resuelve)\b/i;
+    // if (!/<\/?[a-z][\s\S]*>/i.test(html)) {
+    //   const MARKER = /(\bVISTOS\s*:|\bCONSIDERANDO\s*:|\bSE\s+RESUELVE\s*:?|\bSE\s+ACUERDA\s*:?|\bDECRETA\s*:|\bArt[íi]culo\s+\d+[°ºoª]?\s*(?:[.·\-–:])?|\bReg[íi]strese,\s*comun[íi]quese[^.]*\.?)/gi;
+    //   const HEADING = /^(VISTOS|CONSIDERANDO|SE\s+RESUELVE|SE\s+ACUERDA|DECRETA|Art[íi]culo)/i;
+    //   const LINE_HEAD = /^(Art[íi]culo\s+\S+|Cap[íi]tulo\s+\S+|a\)\S+|b\)+\S+|c\)\S+|d\)\S+|e\)\S+|T[íi]tulo\s+\S+|sScci[óo]n\s+\S+|Disposici[óo]n\s+\S+|Anexo\s*\S*|considerando|por cuanto|decreta|resuelve)\b/i;
 
-      html = html
-        .split(/\n{2,}/)
-        .map(block => {
-          // 2a) líneas con encabezado propio
-          const byLines = block.split(/\n/).map(l => l.trim()).filter(Boolean);
-          const useLines = byLines.length > 1 ? byLines : [block.trim()];
-          return useLines.map(piece => {
-            if (LINE_HEAD.test(piece) && piece.length < 220) return `<h4>${piece}</h4>`;
-            // 2b) segmentar marcadores dentro del párrafo
-            const parts = piece.split(MARKER).map(s => (s || '').trim()).filter(Boolean);
-            if (parts.length <= 1) return `<p>${piece}</p>`;
-            return parts.map(part =>
-              HEADING.test(part) ? `<h4>${part}</h4>` : `<p>${part.replace(/^[\s.\-–:;]+/, '')}</p>`
-            ).join('');
-          }).join('');
-        })
-        .join('');
-    }
+    //   html = html
+    //     .split(/\n{2,}/)
+    //     .map(block => {
+    //       // 2a) líneas con encabezado propio
+    //       const byLines = block.split(/\n/).map(l => l.trim()).filter(Boolean);
+    //       const useLines = byLines.length > 1 ? byLines : [block.trim()];
+    //       return useLines.map(piece => {
+    //         if (LINE_HEAD.test(piece) && piece.length < 220) return `<h4>${piece}</h4>`;
+    //         // 2b) segmentar marcadores dentro del párrafo
+    //         const parts = piece.split(MARKER).map(s => (s || '').trim()).filter(Boolean);
+    //         if (parts.length <= 1) return `<p>${piece}</p>`;
+    //         return parts.map(part =>
+    //           HEADING.test(part) ? `<h4>${part}</h4>` : `<p>${part.replace(/^[\s.\-–:;]+/, '')}</p>`
+    //         ).join('');
+    //       }).join('');
+    //     })
+    //     .join('');
+    // }
     // 3) Limpia scripts y atributos peligrosos
     return DOMPurify.sanitize(html);
   }
@@ -136,11 +139,28 @@ export const LegislationLibrary: React.FC = () => {
   const openDetail = async (id: number) => {
     setDetailId(id);
     setDetail(null);
+    setFileText('');
+    setFilePdf('');
     setDetailLoading(true);
     try {
       const res = await fetch(`${import.meta.env.BASE_URL}api/legislation/${id}`);
       const data = await res.json();
-      if (data?.success) setDetail(data.doc);
+      if (data?.success) {
+        setDetail(data.doc);
+        // Lee el archivo físico desde fileNormalized (vía /content/:id)
+        try {
+          const fRes = await fetch(`${import.meta.env.BASE_URL}api/legislation/content/${id}`);
+          const fData = await fRes.json();
+          if (fRes.ok && fData?.success) {
+            if (fData.kind === 'text' && fData.content) setFileText(fData.content);
+            else if (fData.kind === 'pdf' && fData.fileUrl) {
+              setFilePdf(`${import.meta.env.BASE_URL}${String(fData.fileUrl).replace(/^\//, '')}`);
+            }
+          }
+        } catch (fileErr) {
+          console.warn('Sin archivo físico, uso content de BD:', fileErr);
+        }
+      }
     } catch (err) {
       console.error('Error obteniendo norma:', err);
     } finally {
@@ -393,9 +413,16 @@ export const LegislationLibrary: React.FC = () => {
                   {detail.sumilla}
                 </p>
               )}
-              {fileSrc ? (
+              {fileText ? (
                 <iframe
-                  src={fileSrc}
+                  srcDoc={fileText}
+                  sandbox=""
+                  title={detail?.title || 'Documento original'}
+                  className="w-full h-[75vh] rounded-xl border border-slate-200 dark:border-slate-700 bg-white"
+                />
+              ) : (filePdf || fileSrc) ? (
+                <iframe
+                  src={filePdf || fileSrc}
                   title={detail?.title || 'Documento original'}
                   className="w-full h-[75vh] rounded-xl border border-slate-200 dark:border-slate-700 bg-white"
                 />
