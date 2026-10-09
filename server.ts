@@ -135,6 +135,14 @@ async function startServer() {
   // Serve static files from local documents directory
   app.use('/api/documents/file', express.static(DOCUMENTS_DIR));
 
+  // Documentos de normativa (html_docs): se sirven con su ruta real para que los
+  // assets relativos del HTML (css, imágenes) resuelvan bien y conserve sus estilos.
+  // /api/legislation/docs/... → LEGISLATION_DOCS_BASE/... (o /srv/backend_documentos).
+  app.use('/api/legislation/docs', express.static(
+    process.env.LEGISLATION_DOCS_BASE || '/srv/backend_documentos',
+    { dotfiles: 'deny', index: false }
+  ));
+
   // Health check
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

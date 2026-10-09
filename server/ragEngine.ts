@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { knowledgeBase } from './knowledgeBase';
 import { neo4jService } from './neo4jService';
-import { searchLegislationSemantic, LegislationDoc } from './legislationStore';
+import { searchLegislationSemantic, fileHrefFor, LegislationDoc } from './legislationStore';
 import { Citation, DocumentChunk, GraphNode, GraphLink, SearchGroundingSource } from '../src/types';
 
 export class RAGEngine {
@@ -560,7 +560,7 @@ Reglas de respuesta:
       quote: doc.excerpt.slice(0, 180) + '...',
       relevanceScore: 98,
       legalBasis: `${doc.tipoDeNorma || 'Legislación'} · pub. ${doc.fechaPublicacion || 's/f'}`,
-      fileUrl: `/api/legislation/file/${doc.id}`,
+      fileUrl: doc.fileUrl || fileHrefFor(doc.title, doc.tipoDeNorma) || undefined,
       source: 'legislacion' as const,
       fechaPublicacion: doc.fechaPublicacion || undefined,
       tipoNorma: typeof doc.tipoNorma === 'string' ? doc.tipoNorma : undefined

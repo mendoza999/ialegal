@@ -36,6 +36,17 @@ export function fileNormalizedFor(title: string, tipoDeNorma: string): string | 
   return `${DOCS_BASE}/${sub}${rel}`;
 }
 
+/** URL pública del archivo (conserva el directorio real para que los assets
+ *  relativos del HTML resuelvan). Se sirve vía express.static en /api/legislation/docs. */
+export function fileHrefFor(title: string, tipoDeNorma: string): string | null {
+  if (!title) return null;
+  const sub = tipoDeNorma === 'Jurisprudencia' ? 'Jurisprudencia/' : '';
+  const rel = title.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!rel || rel.split('/').includes('..')) return null;
+  const href = `/api/legislation/docs/${sub}${rel}`.replace(/\/+/g, '/');
+  return href.split('/').map((seg, i) => (i < 3 ? seg : encodeURIComponent(seg))).join('/');
+}
+
 /** Columnas mínimas para resolver el archivo (sin traer el content). */
 export async function getLegislationFileInfo(id: number): Promise<{ id: number; title: string; tipoDeNorma: string } | null> {
   const p = getPool();
@@ -110,7 +121,7 @@ function mapRow(r: any): LegislationDoc {
       ? new Date(r.fecha_publicacion).toISOString().slice(0, 10)
       : null,
     tipoDeNorma,
-    fileUrl: `/api/legislation/file/${r.id}`,
+    fileUrl: fileHrefFor(r.title, tipoDeNorma) || undefined,
     fileNormalized: fileNormalizedFor(r.title, tipoDeNorma) || undefined,
     score: typeof r.score === 'number' ? r.score : undefined,
   };
@@ -448,7 +459,7 @@ export async function getLegislationById(id: number): Promise<any | null> {
         ? new Date(row.fecha_publicacion).toISOString().slice(0, 10)
         : null,
       tipoDeNorma,
-      fileUrl: `/api/legislation/file/${row.id}`,
+      fileUrl: fileHrefFor(row.title, tipoDeNorma) || undefined,
       fileNormalized: fileNormalizedFor(row.title, tipoDeNorma) || undefined,
       hasFile: legislationFileExists(row.title, tipoDeNorma),
       content: row.content,

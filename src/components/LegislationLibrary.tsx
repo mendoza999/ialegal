@@ -341,7 +341,7 @@ export const LegislationLibrary: React.FC = () => {
       {detailId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" onClick={() => setDetailId(null)}>
           <div
-            className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+            className={`w-full ${fileSrc ? 'max-w-5xl' : 'max-w-3xl'} bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden`}
             onClick={e => e.stopPropagation()}
           >
             <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
@@ -397,7 +397,7 @@ export const LegislationLibrary: React.FC = () => {
                 <iframe
                   src={fileSrc}
                   title={detail?.title || 'Documento original'}
-                  className="w-full h-[60vh] rounded-xl border border-slate-200 dark:border-slate-700 bg-white"
+                  className="w-full h-[75vh] rounded-xl border border-slate-200 dark:border-slate-700 bg-white"
                 />
               ) : contentHtml ? (
                 <div
