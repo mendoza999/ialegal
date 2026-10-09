@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, CalendarDays, FileText, ChevronLeft, ChevronRight, X, Scale, Tag, ExternalLink } from 'lucide-react';
 import { useMemo } from 'react';
 import DOMPurify from 'dompurify';
-import { Console } from 'console';
+import * as pdfjsLib from "pdfjs-dist";
 
 interface LegislationResult {
   id: number;
@@ -16,6 +16,11 @@ interface LegislationResult {
 
 const PAGE_SIZE = 20;
 
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
+
 // El título a veces trae ruta de archivo ("20261002\\RESOLUCIÓN...html"): mostrar limpio
 function cleanTitle(t?: string | null): string {
   if (!t) return '';
@@ -23,16 +28,87 @@ function cleanTitle(t?: string | null): string {
 }
 
 // Lee el archivo físico tal cual (HTML con sus estilos o PDF) vía su URL directa
-const leerArchivo = async (path: string): Promise<Response | null> => {
-  try {
-    const respuesta = await fetch(path);
-    if (!respuesta.ok) throw new Error('No se pudo leer el archivo');
-    return respuesta;
-  } catch (error) {
-    console.error('Error al leer el archivo:', error);
-    return null;
+// const leerArchivo = async (path: string): Promise<Response | null> => {
+//   try {
+//     const respuesta = await fetch(path);
+//     //console.log("respuesta: ", respuesta);
+//     if (!respuesta.ok) throw new Error('No se pudo leer el archivo');
+//     return respuesta;
+//   } catch (error) {
+//     console.error('Error al leer el archivo:', error);
+//     return null;
+//   }
+// };
+
+export async function leerArchivo(archivo: File | Blob | string) {
+  let blob: Blob;
+  let nombre: string;
+  if (typeof archivo === 'string') {
+    if (!archivo) throw new Error("No se ha seleccionado un archivo.");
+    const respuesta = await fetch(archivo);
+    if (!respuesta.ok) throw new Error("No se pudo leer el archivo");
+    blob = await respuesta.blob();
+    nombre = decodeURIComponent(archivo.split('/').pop()?.split('?')[0] || 'archivo.html');
+  } else {
+    if (!archivo) {
+      throw new Error("No se ha seleccionado un archivo.");
+    }
+    blob = archivo;
+    nombre = (archivo as File).name || 'archivo.html';
   }
-};
+
+  const extension = nombre
+    .split(".")
+    .pop()
+    ?.toLowerCase() || "";
+
+  // Leer HTML
+  if (extension === "html" || extension === "htm") {
+    const html = await blob.text();
+
+    const documento = new DOMParser().parseFromString(
+      html,
+      "text/html"
+    );
+
+    // Eliminar elementos que no aportan contenido textual
+    documento
+      .querySelectorAll("script, style, noscript")
+      .forEach((elemento) => elemento.remove());
+
+    return documento.body.innerText ||
+      documento.body.textContent ||
+      "";
+  }
+
+  // Leer PDF
+  if (extension === "pdf") {
+    const buffer = await blob.arrayBuffer();
+
+    const pdf = await pdfjsLib.getDocument({
+      data: new Uint8Array(buffer)
+    }).promise;
+
+    let contenido = "";
+
+    for (let paginaNum = 1; paginaNum <= pdf.numPages; paginaNum++) {
+      const pagina = await pdf.getPage(paginaNum);
+      const textoPagina = await pagina.getTextContent();
+
+      const texto = textoPagina.items
+        .map((item: any) => item?.str ?? "")
+        .join(" ");
+
+      contenido += `\n--- Página ${paginaNum} ---\n${texto}\n`;
+    }
+
+    return contenido.trim();
+  }
+
+  throw new Error(
+    "Formato no soportado. Selecciona un archivo HTML o PDF."
+  );
+}
 
 export const LegislationLibrary: React.FC = () => {
   const [q, setQ] = useState('');
@@ -162,13 +238,17 @@ export const LegislationLibrary: React.FC = () => {
         // Lee el archivo físico desde fileNormalized (vía fileUrl); fallback al content de la BD
         if (data.doc?.fileUrl && data.doc?.hasFile) {
           const full = `${import.meta.env.BASE_URL}${String(data.doc.fileUrl).replace(/^\//, '')}`;
-          const respuesta = await leerArchivo(full);
-          if (respuesta) {
-            const ct = respuesta.headers.get('content-type') || '';
-            if (ct.includes('pdf')) {
-              setFilePdf(full);
-            } else {
-              setFileText(await respuesta.text());
+          if (/\.pdf$/i.test(full)) {
+            setFilePdf(full);
+          } else {
+            try {
+              const texto = await leerArchivo(full);
+              if (texto) {
+                const esc = texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                setFileText(`<div style="white-space:pre-wrap;">${esc}</div>`);
+              }
+            } catch (fileErr) {
+              console.warn('Sin texto extraíble, se muestra el archivo original:', fileErr);
             }
           }
         }

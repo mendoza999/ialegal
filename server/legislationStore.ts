@@ -18,22 +18,39 @@ export interface LegislationDoc {
   score?: number;
 }
 
-// Base documental en el VPS (override por env para otros entornos).
-const DOCS_BASE = process.env.LEGISLATION_DOCS_BASE || '/srv/backend_documentos';
+// Base documental por sistema operativo (los archivos viven en el VPS Linux;
+// en Windows-desarrollo apuntan a la réplica local F:). Override por env.
+const LINUX_BASE = process.env.LEGISLATION_DOCS_BASE || '/srv/backend_documentos';
+const WIN_BASE =
+  process.env.LEGISLATION_DOCS_BASE_WIN ||
+  'F:\\normas2025\\NormasLegales\\ScrapNormas\\paginas_procesadas';
+
+/** 'linux' | 'win32' | 'darwin' | ... (igual que process.platform) */
+export function detectarSistemaOperativo(): string {
+  return process.platform;
+}
+
+/** Directorio base de documentos según el OS donde corre el backend. */
+export function legislationDocsBase(): string {
+  return detectarSistemaOperativo() === 'linux' ? LINUX_BASE : WIN_BASE;
+}
 
 /**
- * Ruta directa del archivo según tipo_de_norma (siempre estilo POSIX: los archivos
- * viven en el VPS Linux aunque el backend corra en Windows para desarrollo):
- * Legislacion → /srv/backend_documentos/<title>
- * Jurisprudencia → /srv/backend_documentos/Jurisprudencia/<title>
+ * Ruta física del archivo según tipo_de_norma y sistema operativo:
+ * Legislacion   → linux: /srv/backend_documentos/<title>
+ *                      · win:   F:\normas2025\NormasLegales\ScrapNormas\paginas_procesadas\<title>
+ * Jurisprudencia → linux: /srv/backend_documentos/Jurisprudencia/<title>
+ *                      · win:   ...\paginas_procesadas\Jurisprudencia\<title>
  * Devuelve null si el título permitiría escapar de la base (path traversal).
  */
 export function fileNormalizedFor(title: string, tipoDeNorma: string): string | null {
   if (!title) return null;
-  const sub = tipoDeNorma === 'Jurisprudencia' ? 'Jurisprudencia/' : '';
-  const rel = title.replace(/\\/g, '/').replace(/^\/+/, '');
-  if (!rel || rel.split('/').includes('..')) return null;
-  return `${DOCS_BASE}/${sub}${rel}`;
+  const isLinux = detectarSistemaOperativo() === 'linux';
+  const sep = isLinux ? '/' : '\\';
+  const sub = tipoDeNorma === 'Jurisprudencia' ? `Jurisprudencia${sep}` : '';
+  const rel = title.replace(/[\\/]+/g, sep).replace(/^[/\\]+/, '');
+  if (!rel || rel.split(sep).includes('..')) return null;
+  return `${legislationDocsBase()}${sep}${sub}${rel}`;
 }
 
 /** URL pública del archivo (conserva el directorio real para que los assets

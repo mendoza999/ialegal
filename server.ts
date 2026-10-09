@@ -137,9 +137,9 @@ async function startServer() {
 
   // Documentos de normativa (html_docs): se sirven con su ruta real para que los
   // assets relativos del HTML (css, imágenes) resuelvan bien y conserve sus estilos.
-  // /api/legislation/docs/... → LEGISLATION_DOCS_BASE/... (o /srv/backend_documentos).
+  // /api/legislation/docs/... → base según OS (linux: /srv/backend_documentos).
   app.use('/api/legislation/docs', express.static(
-    process.env.LEGISLATION_DOCS_BASE || '/srv/backend_documentos',
+    legislationStore.legislationDocsBase(),
     { dotfiles: 'deny', index: false }
   ));
 
