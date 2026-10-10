@@ -27,6 +27,25 @@ function cleanTitle(t?: string | null): string {
   return t.replace(/\\/g, ' · ').replace(/\.html?$/i, '').trim();
 }
 
+function detectarSistemaOperativo() {
+  const plataforma = navigator.userAgent.toLowerCase();
+
+  if (plataforma.includes("windows")) {
+    return "Windows";
+  }
+
+  if (plataforma.includes("linux")) {
+    return "Linux";
+  }
+
+  if (plataforma.includes("mac")) {
+    return "MacOS";
+  }
+
+  return "Desconocido";
+}
+
+
 // Lee el archivo físico tal cual (HTML con sus estilos o PDF) vía su URL directa
 // const leerArchivo = async (path: string): Promise<Response | null> => {
 //   try {
@@ -132,7 +151,7 @@ export const LegislationLibrary: React.FC = () => {
   function toSafeHtml(raw?: string) {
     if (!raw) return '';
     let html = raw;
-    console.log("html", html);
+    // console.log("html", html);
     // 1) Si viene escapado (&lt;p&gt;), lo decodifica
     // if (/&lt;\/?[a-z][\s\S]*?&gt;/i.test(html)) {
     //   const t = document.createElement('textarea');
@@ -236,8 +255,7 @@ export const LegislationLibrary: React.FC = () => {
       if (data?.success) {
         setDetail(data.doc);
         // Lee el archivo físico desde fileNormalized (vía fileUrl); fallback al content de la BD.
-        // El HTML se muestra CRUDO en srcDoc para conservar sus propios estilos
-        // (la extracción a texto plano pierde centrado, negritas y tamaños).
+        // El HTML se muestra CRUDO en srcDoc para conservar sus propios estilos.
         if (data.doc?.fileUrl && data.doc?.hasFile) {
           const full = `${import.meta.env.BASE_URL}${String(data.doc.fileUrl).replace(/^\//, '')}`;
           if (/\.pdf$/i.test(full)) {

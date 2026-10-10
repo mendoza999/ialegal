@@ -150,22 +150,20 @@ export const LoginScreen: React.FC = () => {
             <button
               type="button"
               onClick={() => switchMode('login')}
-              className={`py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
-                mode === 'login'
+              className={`py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${mode === 'login'
                   ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-500 shadow'
                   : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
+                }`}
             >
               Acceder
             </button>
             <button
               type="button"
               onClick={() => switchMode('register')}
-              className={`py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
-                mode === 'register'
+              className={`py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${mode === 'register'
                   ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-500 shadow'
                   : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
+                }`}
             >
               Regístrate
             </button>
@@ -320,7 +318,7 @@ export const LoginScreen: React.FC = () => {
             </form>
           )}
           <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">
-            <button
+            {/* <button
               type="button"
               onClick={enterGuestMode}
               className="w-full py-3 px-4 rounded-xl text-sm font-bold border-2 border-dashed border-amber-500/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all"
@@ -329,7 +327,7 @@ export const LoginScreen: React.FC = () => {
             </button>
             <p className="text-center text-[11px] text-slate-400 mt-2">
               Sin tarjeta. Luego te pediremos crear tu cuenta.
-            </p>
+            </p> */}
             <div className="flex items-center justify-center space-x-6 mt-4">
               <div className="flex flex-col items-center space-y-1 opacity-60">
                 <Database className="h-4 w-4 text-slate-400" />

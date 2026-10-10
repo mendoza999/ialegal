@@ -226,8 +226,8 @@ async function startServer() {
     }
   });
 
-  // 0d2. Archivo original de la norma (PDF/HTML en /srv/backend_documentos del VPS).
-  // Resuelve la ruta según tipo_de_norma; 404 si no existe (ej. entorno local).
+  // 0d2. Archivo original de la norma: local (sendFile) o remoto Linux (proxy SFTP
+  // con VPS_HOST/USER/PASSWORD). 404 si no existe.
   app.get('/api/legislation/file/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
@@ -236,6 +236,15 @@ async function startServer() {
       if (!info) return res.status(404).json({ error: 'Norma no encontrada.' });
       const fp = legislationStore.fileNormalizedFor(info.title, info.tipoDeNorma);
       if (!fp) return res.status(400).json({ error: 'Ruta de archivo inválida.' });
+      if (legislationStore.useRemoteDocs()) {
+        const buf = await legislationStore.readRemoteFile(fp);
+        if (!buf) return res.status(404).json({ error: 'Archivo no disponible en el servidor.' });
+        const ext = fp.slice(fp.lastIndexOf('.')).toLowerCase();
+        if (ext === '.pdf') res.type('application/pdf');
+        else if (ext === '.html' || ext === '.htm') res.type('text/html');
+        else if (ext === '.txt' || ext === '.xml') res.type('text/plain');
+        return res.send(buf);
+      }
       res.sendFile(fp, { dotfiles: 'deny' }, (err) => {
         if (err && !res.headersSent) {
           res.status(404).json({ error: 'Archivo no disponible en el servidor.' });

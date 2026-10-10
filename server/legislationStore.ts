@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import fs from 'fs';
+import { Client } from 'ssh2';
 
 // Acceso a la 2da BD Postgres (tabla public.html_docs).
 // Nunca tumba el chat: sin LEGISLATION_DATABASE_URL o con la BD caída,
@@ -35,6 +36,70 @@ export function legislationDocsBase(): string {
   return detectarSistemaOperativo() === 'linux' ? LINUX_BASE : WIN_BASE;
 }
 
+/** En Linux los archivos están en OTRO servidor (SFTP con VPS_*); en win son locales. */
+export function useRemoteDocs(): boolean {
+  return detectarSistemaOperativo() === 'linux' && !!process.env.VPS_HOST;
+}
+
+let sshReady: Promise<Client> | null = null;
+
+function getSsh(): Promise<Client> {
+  if (sshReady) return sshReady;
+  sshReady = new Promise<Client>((resolve, reject) => {
+    const c = new Client();
+    const timer = setTimeout(() => {
+      sshReady = null;
+      try { c.end(); } catch { /* noop */ }
+      reject(new Error('SSH timeout'));
+    }, 15000);
+    c.on('ready', () => {
+      clearTimeout(timer);
+      resolve(c);
+    })
+      .on('error', (err) => {
+        clearTimeout(timer);
+        sshReady = null;
+        reject(err);
+      })
+      .on('close', () => {
+        sshReady = null;
+      })
+      .connect({
+        host: process.env.VPS_HOST,
+        username: process.env.VPS_USER,
+        password: process.env.VPS_PASSWORD,
+        readyTimeout: 12000,
+      });
+  });
+  return sshReady;
+}
+
+function openSftp(c: Client): Promise<any> {
+  return new Promise((resolve, reject) => {
+    c.sftp((err, sftp) => (err ? reject(err) : resolve(sftp)));
+  });
+}
+
+/** Lee un archivo del servidor remoto (Buffer) o null si falla. */
+export async function readRemoteFile(fp: string): Promise<Buffer | null> {
+  try {
+    const c = await getSsh();
+    const sftp = await openSftp(c);
+    const chunks: Buffer[] = [];
+    await new Promise<void>((resolve, reject) => {
+      const rs = sftp.createReadStream(fp);
+      rs.on('data', (d: any) => chunks.push(Buffer.from(d)));
+      rs.on('end', () => resolve());
+      rs.on('error', (e: any) => reject(e));
+    });
+    return Buffer.concat(chunks);
+  } catch (err: any) {
+    console.warn('[Legislation] SFTP read falló:', err?.message || err);
+    sshReady = null;
+    return null;
+  }
+}
+
 /**
  * Ruta física del archivo según tipo_de_norma y sistema operativo:
  * Legislacion   → linux: /srv/backend_documentos/<title>
@@ -53,10 +118,14 @@ export function fileNormalizedFor(title: string, tipoDeNorma: string): string | 
   return `${legislationDocsBase()}${sep}${sub}${rel}`;
 }
 
-/** URL pública del archivo (conserva el directorio real para que los assets
- *  relativos del HTML resuelvan). Se sirve vía express.static en /api/legislation/docs. */
-export function fileHrefFor(title: string, tipoDeNorma: string): string | null {
+/** URL pública del archivo: proxy /file/:id si es remoto (SFTP), estático
+ *  /docs/... si es local (conserva el directorio real para que los assets
+ *  relativos del HTML resuelvan). */
+export function fileHrefFor(title: string, tipoDeNorma: string, id?: number): string | null {
   if (!title) return null;
+  if (useRemoteDocs()) {
+    return typeof id === 'number' ? `/api/legislation/file/${id}` : null;
+  }
   const sub = tipoDeNorma === 'Jurisprudencia' ? 'Jurisprudencia/' : '';
   const rel = title.replace(/\\/g, '/').replace(/^\/+/, '');
   if (!rel || rel.split('/').includes('..')) return null;
@@ -80,12 +149,24 @@ export async function getLegislationFileInfo(id: number): Promise<{ id: number; 
   }
 }
 
-/** true si el archivo físico existe (para decidir si mostrar el botón "ver original"). */
-export function legislationFileExists(title: string, tipoDeNorma: string): boolean {
+/** true si el archivo existe: local (existsSync) o remoto (stat SFTP). */
+export async function legislationFileExists(title: string, tipoDeNorma: string): Promise<boolean> {
   const fp = fileNormalizedFor(title, tipoDeNorma);
   if (!fp) return false;
+  if (!useRemoteDocs()) {
+    try {
+      return fs.existsSync(fp);
+    } catch {
+      return false;
+    }
+  }
   try {
-    return fs.existsSync(fp);
+    const c = await getSsh();
+    const sftp = await openSftp(c);
+    await new Promise<void>((resolve, reject) => {
+      sftp.stat(fp, (err: any, stats: any) => (err || !stats ? reject(err || new Error('no stat')) : resolve()));
+    });
+    return true;
   } catch {
     return false;
   }
@@ -138,7 +219,7 @@ function mapRow(r: any): LegislationDoc {
       ? new Date(r.fecha_publicacion).toISOString().slice(0, 10)
       : null,
     tipoDeNorma,
-    fileUrl: fileHrefFor(r.title, tipoDeNorma) || undefined,
+    fileUrl: fileHrefFor(r.title, tipoDeNorma, r.id) || undefined,
     fileNormalized: fileNormalizedFor(r.title, tipoDeNorma) || undefined,
     score: typeof r.score === 'number' ? r.score : undefined,
   };
@@ -476,9 +557,9 @@ export async function getLegislationById(id: number): Promise<any | null> {
         ? new Date(row.fecha_publicacion).toISOString().slice(0, 10)
         : null,
       tipoDeNorma,
-      fileUrl: fileHrefFor(row.title, tipoDeNorma) || undefined,
+      fileUrl: fileHrefFor(row.title, tipoDeNorma, row.id) || undefined,
       fileNormalized: fileNormalizedFor(row.title, tipoDeNorma) || undefined,
-      hasFile: legislationFileExists(row.title, tipoDeNorma),
+      hasFile: await legislationFileExists(row.title, tipoDeNorma),
       content: row.content,
     };
   } catch (err: any) {
